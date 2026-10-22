@@ -2,6 +2,7 @@
   "note": "Written by the Bellchain sync; do not edit.",
   "version": "2026.10.22.18",
   "files": {
+    ".gitattributes": "5d967cbe34212339602dbe2f2b1e1d9c1cda6a188d23c0c78cf817d9214189c5",
     ".github/ISSUE_TEMPLATE/config.yml": "a3f92d47764a7e23106071322a75d619e2d4e56315e70e8fec596ae698896c27",
     ".github/ISSUE_TEMPLATE/template-idea.yml": "e35b44e94f57b6836bc768dc1dbac680702333bc732e3701ff66760d892f593a",
     ".github/ISSUE_TEMPLATE/template-problem.yml": "9c80781e7843d79559690166f930a3105a153f8355aa6b35a84b80f73c048d3d",

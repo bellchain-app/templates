@@ -1,0 +1,2 @@
+# Written by the Bellchain sync. GitHub folds these files in diffs and leaves them out of the language bar.
+scripts/check.mjs linguist-generated=true
