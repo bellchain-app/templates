@@ -1,0 +1,83 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "Große Bewegungen bei BTC, ETH und SOL",
+  "version": 1,
+  "description": "Bewegt sich BTC, ETH oder SOL in einer Stunde um mehr als 2 %, postet die Chain in deinen Discord-Kanal.",
+  "meta": {
+    "title": {
+      "de": "Große Bewegungen bei BTC, ETH und SOL",
+      "en": "Big Moves in BTC, ETH and SOL"
+    },
+    "description": {
+      "de": "Bewegt sich BTC, ETH oder SOL in einer Stunde um mehr als 2 %, postet die Chain in deinen Discord-Kanal.",
+      "en": "When BTC, ETH or SOL moves more than 2 % within an hour, the chain posts to your Discord channel."
+    },
+    "tags": [
+      "crash"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: ein Ticker für die Community. Je Coin prüft „Bereich“, ob die Veränderung der letzten Stunde außerhalb von −2 bis +2 % liegt; ODER fasst die drei zusammen. Für Discord legst du in den Einstellungen des Kanals unter Integrationen einen Webhook an und kopierst seine Adresse in den Discord-Baustein.",
+        "en": "Idea: a ticker for your community. For each coin, “Range” checks whether the last hour’s change lies outside −2 to +2 %; OR combines the three. For Discord, create a webhook under Integrations in the channel settings and copy its address into the Discord node."
+      }
+    },
+    "messages": {
+      "m1": {
+        "de": "⚡ Große Bewegung in der letzten Stunde: BTC {{a}} % · ETH {{b}} % · SOL {{c}} %",
+        "en": "⚡ Big move in the last hour: BTC {{a}}% · ETH {{b}}% · SOL {{c}}%"
+      }
+    },
+    "tips": [
+      {
+        "de": "Weitere Coins: Kerze, Veränderung % und Bereich kopieren und an ODER hängen.",
+        "en": "More coins: copy candle, Change % and Range and connect them to OR."
+      },
+      {
+        "de": "3 statt 2 in den Grenzen von „Bereich“ meldet nur große Sprünge.",
+        "en": "3 instead of 2 in the limits of “Range” reports only big jumps."
+      }
+    ],
+    "test": {
+      "alerts": 29,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 40 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "c2", "type": "core.candle", "position": { "x": 30, "y": 250 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "1h" } },
+    { "id": "c3", "type": "core.candle", "position": { "x": 30, "y": 460 }, "settings": { "exchange": "binance", "pair": "SOL/USDT", "timeframe": "1h" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 150 }, "settings": { "length": 1 } },
+    { "id": "g2", "type": "core.change", "position": { "x": 280, "y": 288 }, "settings": { "length": 1 } },
+    { "id": "g3", "type": "core.change", "position": { "x": 280, "y": 426 }, "settings": { "length": 1 } },
+    { "id": "b1", "type": "core.range", "position": { "x": 530, "y": 150 }, "settings": { "mode": "outside", "low": -2, "high": 2 } },
+    { "id": "b2", "type": "core.range", "position": { "x": 530, "y": 288 }, "settings": { "mode": "outside", "low": -2, "high": 2 } },
+    { "id": "b3", "type": "core.range", "position": { "x": 530, "y": 426 }, "settings": { "mode": "outside", "low": -2, "high": 2 } },
+    { "id": "o1", "type": "core.or", "position": { "x": 780, "y": 170 }, "settings": {} },
+    { "id": "m1", "type": "core.message", "position": { "x": 780, "y": 352 }, "settings": { "text": "⚡ Große Bewegung in der letzten Stunde: BTC {{a}} % · ETH {{b}} % · SOL {{c}} %" } },
+    { "id": "x1", "type": "core.discord", "position": { "x": 1030, "y": 290 }, "settings": { "cooldown": 2 } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 680 },
+      "settings": { "text": "Idee: ein Ticker für die Community. Je Coin prüft „Bereich“, ob die Veränderung der letzten Stunde außerhalb von −2 bis +2 % liegt; ODER fasst die drei zusammen. Für Discord legst du in den Einstellungen des Kanals unter Integrationen einen Webhook an und kopierst seine Adresse in den Discord-Baustein." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "c2.close", "to": "g2.in" },
+    { "from": "c3.close", "to": "g3.in" },
+    { "from": "g1.out", "to": "b1.in" },
+    { "from": "g2.out", "to": "b2.in" },
+    { "from": "g3.out", "to": "b3.in" },
+    { "from": "b1.out", "to": "o1.in0" },
+    { "from": "b2.out", "to": "o1.in1" },
+    { "from": "b3.out", "to": "o1.in2" },
+    { "from": "g1.out", "to": "m1.a" },
+    { "from": "g2.out", "to": "m1.b" },
+    { "from": "g3.out", "to": "m1.c" },
+    { "from": "o1.out", "to": "x1.in" },
+    { "from": "m1.out", "to": "x1.message" }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Wende im Discount",
+  "version": 1,
+  "description": "Die kleinere Marktstruktur dreht nach oben (CHoCH), während der Kurs in der unteren Hälfte der Spanne liegt.",
+  "meta": {
+    "title": {
+      "de": "BTC Wende im Discount",
+      "en": "BTC Reversal in Discount"
+    },
+    "description": {
+      "de": "Die kleinere Marktstruktur dreht nach oben (CHoCH), während der Kurs in der unteren Hälfte der Spanne liegt.",
+      "en": "The smaller market structure turns up (CHoCH) while the price sits in the lower half of the range."
+    },
+    "tags": [
+      "smartmoney",
+      "konfluenz"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Zwei Bedingungen zugleich: Die kleinere Marktstruktur (Swings 5 · 5) wechselt den Charakter nach oben, der erste Bruch gegen den Abwärtstrend, und der Kurs liegt im Discount, der unteren Hälfte der Spanne aus den größeren Swings (10 · 10). Eine Wende dort, wo der Kurs günstig ist, gilt vielen als besserer Einstieg als eine Wende im Premium. Selten, aber deutlich.",
+        "en": "Two conditions at once: the smaller market structure (swings 5 · 5) changes character upward, the first break against the downtrend, and the price sits in discount, the lower half of the range from the larger swings (10 · 10). Many consider a turn where the price is cheap a better entry than a turn in premium. Rare, but clear."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} dreht im Discount nach oben (CHoCH) · {{werte}}",
+        "en": "▲ {{coin}} turns up in discount (CHoCH) · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "„Gleichgewicht ±0“ nimmt die Lehrbuch-Hälften: Discount ist dann alles unter 50 %.",
+        "en": "“Equilibrium ±0” uses the textbook halves: discount is then everything below 50 %."
+      },
+      {
+        "de": "Für Short: „CHoCH nach unten“ und „im Premium“.",
+        "en": "For shorts: “CHoCH down” and “In premium”."
+      },
+      {
+        "de": "„Danach“ statt UND lässt dem Kurs Zeit: erst im Discount, dann innerhalb einiger Kerzen der CHoCH.",
+        "en": "“Then” instead of AND gives the price time: first in discount, then the CHoCH within a few candles."
+      }
+    ],
+    "test": {
+      "alerts": 5,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "s1", "type": "core.structure", "position": { "x": 330, "y": 40 }, "settings": { "left": 5, "right": 5, "trigger": "close" } },
+    { "id": "p1", "type": "core.premium-discount", "position": { "x": 330, "y": 300 }, "settings": { "band": 5, "left": 10, "right": 10 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 630, "y": 170 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 900, "y": 170 }, "settings": { "cooldown": 6, "message": "▲ {{coin}} dreht im Discount nach oben (CHoCH) · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 580 },
+      "settings": { "text": "Zwei Bedingungen zugleich: Die kleinere Marktstruktur (Swings 5 · 5) wechselt den Charakter nach oben, der erste Bruch gegen den Abwärtstrend, und der Kurs liegt im Discount, der unteren Hälfte der Spanne aus den größeren Swings (10 · 10). Eine Wende dort, wo der Kurs günstig ist, gilt vielen als besserer Einstieg als eine Wende im Premium. Selten, aber deutlich." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "c1.close", "to": "p1.close" },
+    { "from": "c1.high", "to": "p1.high" },
+    { "from": "c1.low", "to": "p1.low" },
+    { "from": "s1.chochUp", "to": "a1.in0" },
+    { "from": "p1.discount", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

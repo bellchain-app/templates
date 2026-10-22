@@ -1,0 +1,85 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Heikin Ashi dreht mit dem Trend",
+  "version": 1,
+  "description": "Heikin Ashi wird grün über dem EMA 50 (▲) oder rot darunter (▼), auf 4-Stunden-Kerzen.",
+  "meta": {
+    "title": {
+      "de": "ETH Heikin Ashi dreht mit dem Trend",
+      "en": "ETH Heikin Ashi Turns With the Trend"
+    },
+    "description": {
+      "de": "Heikin Ashi wird grün über dem EMA 50 (▲) oder rot darunter (▼), auf 4-Stunden-Kerzen.",
+      "en": "Heikin Ashi turns green above the EMA 50 (▲) or red below it (▼), on 4-hour candles."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Heikin-Ashi-Kerzen glätten den Kurs; ihre Farbe wechselt seltener als die normaler Kerzen. Die Chain meldet nur Wenden in Richtung des größeren Trends: grün über dem EMA 50, rot darunter. Die Werte der Heikin-Ashi-Kerzen sind Mittelwerte, keine gehandelten Kurse.",
+        "en": "Idea: Heikin Ashi candles smooth the price; their color changes less often than that of normal candles. The chain only reports turns in the direction of the larger trend: green above the EMA 50, red below it. The values of Heikin Ashi candles are averages, not traded prices."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Heikin Ashi dreht nach oben · {{werte}}",
+        "en": "▲ {{coin}}: Heikin Ashi turns up · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: Heikin Ashi dreht nach unten · {{werte}}",
+        "en": "▼ {{coin}}: Heikin Ashi turns down · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Ohne EMA meldet die Chain jede Wende, auf 4-Stunden-Kerzen etwa jeden zweiten Tag.",
+        "en": "Without the EMA the chain reports every turn, on 4-hour candles about every other day."
+      },
+      {
+        "de": "Mit dem Baustein Bestätigung (2 Kerzen) am Ausgang „grün“ zählt nur eine Farbe, die hält.",
+        "en": "With the Confirmation node (2 candles) on the “green” output only a color that holds counts."
+      }
+    ],
+    "test": {
+      "alerts": 56,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "4h" } },
+    { "id": "h1", "type": "core.heikin-ashi", "position": { "x": 300, "y": 20 }, "settings": {} },
+    { "id": "e1", "type": "core.ma", "position": { "x": 300, "y": 320 }, "settings": { "kind": "ema", "length": 50 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 560, "y": 200 }, "settings": { "operator": "above", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 560, "y": 330 }, "settings": { "operator": "below", "factor": 1 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 820, "y": 60 }, "settings": {} },
+    { "id": "a2", "type": "core.and", "position": { "x": 820, "y": 260 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1080, "y": 60 }, "settings": { "cooldown": 24, "message": "▲ {{coin}}: Heikin Ashi dreht nach oben · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 1080, "y": 260 }, "settings": { "cooldown": 24, "message": "▼ {{coin}}: Heikin Ashi dreht nach unten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Heikin-Ashi-Kerzen glätten den Kurs; ihre Farbe wechselt seltener als die normaler Kerzen. Die Chain meldet nur Wenden in Richtung des größeren Trends: grün über dem EMA 50, rot darunter. Die Werte der Heikin-Ashi-Kerzen sind Mittelwerte, keine gehandelten Kurse." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "h1.close" },
+    { "from": "c1.open", "to": "h1.open" },
+    { "from": "c1.high", "to": "h1.high" },
+    { "from": "c1.low", "to": "h1.low" },
+    { "from": "c1.close", "to": "e1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "e1.out", "to": "k1.b" },
+    { "from": "c1.close", "to": "k2.a" },
+    { "from": "e1.out", "to": "k2.b" },
+    { "from": "h1.up", "to": "a1.in0" },
+    { "from": "k1.out", "to": "a1.in1" },
+    { "from": "h1.down", "to": "a2.in0" },
+    { "from": "k2.out", "to": "a2.in1" },
+    { "from": "a1.out", "to": "t1.in" },
+    { "from": "a2.out", "to": "t2.in" }
+  ]
+}

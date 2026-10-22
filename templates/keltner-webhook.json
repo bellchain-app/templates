@@ -1,0 +1,77 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "SOL Keltner-Ausbruch als Webhook",
+  "version": 1,
+  "description": "Der Kurs verlässt den Keltner-Kanal: ▲ nach oben, ▼ nach unten, als Webhook.",
+  "meta": {
+    "title": {
+      "de": "SOL Keltner-Ausbruch als Webhook",
+      "en": "SOL Keltner Breakout as a Webhook"
+    },
+    "description": {
+      "de": "Der Kurs verlässt den Keltner-Kanal: ▲ nach oben, ▼ nach unten, als Webhook.",
+      "en": "The price leaves the Keltner Channel: ▲ up, ▼ down, as a webhook."
+    },
+    "tags": [
+      "volatilitaet",
+      "ausbruch"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Der Keltner-Kanal legt das 2,5-Fache der ATR um einen EMA 20. Schließt der Kurs außerhalb, bewegt er sich mehr als üblich. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren. Ein Tabellenblatt oder ein Bot kann so jede Bewegung mitschreiben.",
+        "en": "Idea: the Keltner Channel puts 2.5 times the ATR around an EMA 20. When the price closes outside, it moves more than usual. Enter your system’s https address in both webhook nodes; without it the chain cannot be activated. A spreadsheet or a bot can then record every move."
+      }
+    },
+    "messages": {
+      "w1": {
+        "de": "▲ {{paar}}: über dem Keltner-Kanal · {{kurs}}",
+        "en": "▲ {{pair}}: above the Keltner Channel · {{price}}"
+      },
+      "w2": {
+        "de": "▼ {{paar}}: unter dem Keltner-Kanal · {{kurs}}",
+        "en": "▼ {{pair}}: below the Keltner Channel · {{price}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Faktor 2 statt 2,5 meldet mehr Ausbrüche.",
+        "en": "A factor of 2 instead of 2.5 reports more breakouts."
+      },
+      {
+        "de": "Mit 4-Stunden-Kerzen bleiben nur die großen.",
+        "en": "With 4-hour candles only the big ones remain."
+      }
+    ],
+    "test": {
+      "alerts": 40,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "SOL/USDT", "timeframe": "1h" } },
+    { "id": "k0", "type": "core.keltner", "position": { "x": 280, "y": 100 }, "settings": { "length": 20, "mult": 2.5, "atrLength": 10, "kind": "ema" } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{paar}}: über dem Keltner-Kanal · {{kurs}}" } },
+    { "id": "w2", "type": "core.webhook", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 4, "message": "▼ {{paar}}: unter dem Keltner-Kanal · {{kurs}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Der Keltner-Kanal legt das 2,5-Fache der ATR um einen EMA 20. Schließt der Kurs außerhalb, bewegt er sich mehr als üblich. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren. Ein Tabellenblatt oder ein Bot kann so jede Bewegung mitschreiben." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "k0.close" },
+    { "from": "c1.high", "to": "k0.high" },
+    { "from": "c1.low", "to": "k0.low" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "k0.upper", "to": "k1.b" },
+    { "from": "c1.close", "to": "k2.a" },
+    { "from": "k0.lower", "to": "k2.b" },
+    { "from": "k1.out", "to": "w1.in" },
+    { "from": "k2.out", "to": "w2.in" }
+  ]
+}

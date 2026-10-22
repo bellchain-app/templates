@@ -1,0 +1,80 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC und ETH fallen gemeinsam",
+  "version": 1,
+  "description": "BTC verliert 2 % und ETH 2,5 % in vier Stunden: ein Webhook an dein System und ein Push.",
+  "meta": {
+    "title": {
+      "de": "BTC und ETH fallen gemeinsam",
+      "en": "BTC and ETH Fall Together"
+    },
+    "description": {
+      "de": "BTC verliert 2 % und ETH 2,5 % in vier Stunden: ein Webhook an dein System und ein Push.",
+      "en": "BTC loses 2 % and ETH 2.5 % in four hours: a webhook to your system and a push."
+    },
+    "tags": [
+      "crash",
+      "konfluenz"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Fallen beide großen Coins zugleich, betrifft es meist den ganzen Markt. Die Chain liest zwei Kerzen und meldet sich nur, wenn beide Bedingungen zutreffen. Trag im Webhook-Baustein die https-Adresse deines Systems ein.",
+        "en": "Idea: when both major coins fall at the same time, it usually affects the whole market. The chain reads two candles and only alerts when both conditions hold. Enter your system’s https address in the webhook node."
+      }
+    },
+    "messages": {
+      "m1": {
+        "de": "▼ Markt fällt: BTC {{a}} %, ETH {{b}} % in 4 Stunden",
+        "en": "▼ Market falling: BTC {{a}}%, ETH {{b}}% in 4 hours"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit SOL als dritter Kerze und „Mindestens 2 von 3“ statt UND reicht es, wenn zwei fallen.",
+        "en": "With SOL as a third candle and “At least 2 of 3” instead of AND, two falling is enough."
+      },
+      {
+        "de": "−3 % und −4 % melden nur heftige Einbrüche.",
+        "en": "−3 % and −4 % report only severe drops."
+      }
+    ],
+    "test": {
+      "alerts": 5,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 40 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "c2", "type": "core.candle", "position": { "x": 30, "y": 250 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "1h" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 110 }, "settings": { "length": 4 } },
+    { "id": "g2", "type": "core.change", "position": { "x": 280, "y": 248 }, "settings": { "length": 4 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 110 }, "settings": { "operator": "below", "value": -2 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 248 }, "settings": { "operator": "below", "value": -2.5 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 80 }, "settings": {} },
+    { "id": "m1", "type": "core.message", "position": { "x": 780, "y": 234 }, "settings": { "text": "▼ Markt fällt: BTC {{a}} %, ETH {{b}} % in 4 Stunden" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 1030, "y": 110 }, "settings": { "cooldown": 6 } },
+    { "id": "p1", "type": "core.push", "position": { "x": 1030, "y": 248 }, "settings": { "cooldown": 6 } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 470 },
+      "settings": { "text": "Idee: Fallen beide großen Coins zugleich, betrifft es meist den ganzen Markt. Die Chain liest zwei Kerzen und meldet sich nur, wenn beide Bedingungen zutreffen. Trag im Webhook-Baustein die https-Adresse deines Systems ein." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "c2.close", "to": "g2.in" },
+    { "from": "g1.out", "to": "k1.in" },
+    { "from": "g2.out", "to": "k2.in" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "g1.out", "to": "m1.a" },
+    { "from": "g2.out", "to": "m1.b" },
+    { "from": "a1.out", "to": "w1.in" },
+    { "from": "m1.out", "to": "w1.message" },
+    { "from": "a1.out", "to": "p1.in" },
+    { "from": "m1.out", "to": "p1.message" }
+  ]
+}

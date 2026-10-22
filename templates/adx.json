@@ -1,0 +1,84 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ADA Trend gewinnt an Kraft",
+  "version": 1,
+  "description": "Der ADX steigt über 25: ▲ wenn +DI vorn liegt, ▼ wenn −DI vorn liegt.",
+  "meta": {
+    "title": {
+      "de": "ADA Trend gewinnt an Kraft",
+      "en": "ADA Trend Gains Strength"
+    },
+    "description": {
+      "de": "Der ADX steigt über 25: ▲ wenn +DI vorn liegt, ▼ wenn −DI vorn liegt.",
+      "en": "The ADX rises above 25: ▲ when +DI leads, ▼ when −DI leads."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Der ADX misst, wie stark ein Trend ist, nicht seine Richtung. Steigt er über 25, beginnt ein deutlicher Trend; ob er nach oben oder unten zeigt, sagen +DI und −DI.",
+        "en": "Idea: the ADX measures how strong a trend is, not its direction. When it rises above 25, a clear trend begins; +DI and −DI tell whether it points up or down."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: starker Trend nach oben · {{werte}}",
+        "en": "▲ {{coin}}: strong trend up · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: starker Trend nach unten · {{werte}}",
+        "en": "▼ {{coin}}: strong trend down · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Schwelle 30 meldet erst kräftigere Trends.",
+        "en": "A threshold of 30 only reports stronger trends."
+      },
+      {
+        "de": "Mit 4-Stunden-Kerzen zeigt der ADX die großen Trends.",
+        "en": "With 4-hour candles the ADX shows the big trends."
+      }
+    ],
+    "test": {
+      "alerts": 29,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 140 }, "settings": { "exchange": "binance", "pair": "ADA/USDT", "timeframe": "1h" } },
+    { "id": "d1", "type": "core.adx", "position": { "x": 280, "y": 170 }, "settings": { "length": 14, "smoothing": 14 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "value": 25 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "above", "factor": 1 } },
+    { "id": "k3", "type": "core.compare-ab", "position": { "x": 530, "y": 316 }, "settings": { "operator": "below", "factor": 1 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 90 }, "settings": {} },
+    { "id": "a2", "type": "core.and", "position": { "x": 780, "y": 244 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 110 }, "settings": { "cooldown": 6, "message": "▲ {{coin}}: starker Trend nach oben · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 1030, "y": 248 }, "settings": { "cooldown": 6, "message": "▼ {{coin}}: starker Trend nach unten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 460 },
+      "settings": { "text": "Idee: Der ADX misst, wie stark ein Trend ist, nicht seine Richtung. Steigt er über 25, beginnt ein deutlicher Trend; ob er nach oben oder unten zeigt, sagen +DI und −DI." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "d1.close" },
+    { "from": "c1.high", "to": "d1.high" },
+    { "from": "c1.low", "to": "d1.low" },
+    { "from": "d1.adx", "to": "k1.in" },
+    { "from": "d1.plus", "to": "k2.a" },
+    { "from": "d1.minus", "to": "k2.b" },
+    { "from": "d1.plus", "to": "k3.a" },
+    { "from": "d1.minus", "to": "k3.b" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "k1.out", "to": "a2.in0" },
+    { "from": "k3.out", "to": "a2.in1" },
+    { "from": "a1.out", "to": "t1.in" },
+    { "from": "a2.out", "to": "t2.in" }
+  ]
+}

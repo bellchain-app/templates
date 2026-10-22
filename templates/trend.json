@@ -1,0 +1,74 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Trendwende mit Supertrend",
+  "version": 1,
+  "description": "Meldet, wenn der Supertrend dreht: ▲ nach oben, ▼ nach unten.",
+  "meta": {
+    "title": {
+      "de": "BTC Trendwende mit Supertrend",
+      "en": "BTC Trend Flip with Supertrend"
+    },
+    "description": {
+      "de": "Meldet, wenn der Supertrend dreht: ▲ nach oben, ▼ nach unten.",
+      "en": "Alerts when the Supertrend flips: ▲ up, ▼ down."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Der Supertrend zieht eine Linie hinter dem Kurs her. Schließt eine Kerze auf ihrer anderen Seite, dreht der Trend: ▲ meldet die Wende nach oben, ▼ die nach unten. Mit Faktor 4 statt 3 kommen weniger, dafür deutlichere Wenden.",
+        "en": "The Supertrend trails a line behind the price. When a candle closes on its other side, the trend flips: ▲ reports the turn up, ▼ the turn down. A factor of 4 instead of 3 gives fewer but clearer turns."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Supertrend dreht nach oben · {{werte}}",
+        "en": "▲ {{coin}}: Supertrend turns up · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: Supertrend dreht nach unten · {{werte}}",
+        "en": "▼ {{coin}}: Supertrend turns down · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Faktor 4 statt 3 meldet seltenere, deutlichere Wenden.",
+        "en": "A factor of 4 instead of 3 reports rarer, clearer turns."
+      },
+      {
+        "de": "4-Stunden-Kerzen zeigen den größeren Trend.",
+        "en": "4-hour candles show the bigger trend."
+      },
+      {
+        "de": "Interessiert dich nur eine Richtung, lösch die andere Aktion.",
+        "en": "If only one direction matters, delete the other action."
+      }
+    ],
+    "test": {
+      "alerts": 59,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "s1", "type": "core.supertrend", "position": { "x": 330, "y": 150 }, "settings": { "length": 10, "factor": 3 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 660, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: Supertrend dreht nach oben · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 660, "y": 260 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: Supertrend dreht nach unten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 380 },
+      "settings": { "text": "Der Supertrend zieht eine Linie hinter dem Kurs her. Schließt eine Kerze auf ihrer anderen Seite, dreht der Trend: ▲ meldet die Wende nach oben, ▼ die nach unten. Mit Faktor 4 statt 3 kommen weniger, dafür deutlichere Wenden." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "s1.up", "to": "t1.in" },
+    { "from": "s1.down", "to": "t2.in" }
+  ]
+}

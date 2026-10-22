@@ -1,0 +1,80 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "Tagesschluss unter dem 20-Tage-Schnitt",
+  "version": 1,
+  "description": "Meldet für BTC, ETH und SOL jeden Tagesschluss unter dem 20-Tage-Schnitt, einmal beim Kreuzen, jeden Coin einzeln.",
+  "meta": {
+    "title": {
+      "de": "Tagesschluss unter dem 20-Tage-Schnitt",
+      "en": "Daily Close Below the 20-Day Average"
+    },
+    "description": {
+      "de": "Meldet für BTC, ETH und SOL jeden Tagesschluss unter dem 20-Tage-Schnitt, einmal beim Kreuzen, jeden Coin einzeln.",
+      "en": "Reports for BTC, ETH and SOL every daily close below the 20-day average, once when it crosses, each coin on its own."
+    },
+    "tags": [
+      "trend",
+      "scanner"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Schließt ein Coin unter seinem 20-Tage-Schnitt, kippt der kurzfristige Trend; viele behalten genau diese Linie im Blick. Gezählt wird nur der Tagesschluss um 24:00 UTC, ein Docht darunter während des Tages löst nichts aus. Die Kerze läuft als Scanner über BTC, ETH und SOL, jeder Coin meldet sich einzeln, einmal beim Kreuzen. Coins änderst du in der Kerze unter „Mehrere Coins“. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren.",
+        "en": "Idea: when a coin closes below its 20-day average, the short-term trend tips over; many keep an eye on exactly this line. Only the daily close at 24:00 UTC counts; a wick below it during the day triggers nothing. The candle runs as a scanner over BTC, ETH and SOL; each coin alerts on its own, once when it crosses. You change the coins in the candle under “Several coins”. Enter your system’s https address in the webhook node; without it the chain cannot be activated."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▼ {{coin}}: Tagesschluss unter dem 20-Tage-Schnitt · {{werte}}",
+        "en": "▼ {{coin}}: daily close below the 20-day average · {{values}}"
+      },
+      "w1": {
+        "de": "▼ {{coin}}: Tagesschluss unter dem 20-Tage-Schnitt · {{werte}}",
+        "en": "▼ {{coin}}: daily close below the 20-day average · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 50 statt 20 Tagen meldet der Scanner nur Brüche des mittelfristigen Trends.",
+        "en": "With 50 instead of 20 days the scanner only reports breaks of the medium-term trend."
+      },
+      {
+        "de": "„Kreuzt nach oben“ statt „kreuzt nach unten“ meldet die Rückkehr über den Schnitt.",
+        "en": "“Crosses above” instead of “crosses below” reports the return above the average."
+      }
+    ],
+    "test": {
+      "alerts": 15,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "scanner": {
+    "node": "c1",
+    "pairs": [
+      "BTC/USDT",
+      "ETH/USDT",
+      "SOL/USDT"
+    ]
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1d" } },
+    { "id": "m1", "type": "core.ma", "position": { "x": 280, "y": 260 }, "settings": { "kind": "sma", "length": 20 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 150 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 80 }, "settings": { "cooldown": 24, "message": "▼ {{coin}}: Tagesschluss unter dem 20-Tage-Schnitt · {{werte}}" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 780, "y": 220 }, "settings": { "cooldown": 24, "message": "▼ {{coin}}: Tagesschluss unter dem 20-Tage-Schnitt · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Schließt ein Coin unter seinem 20-Tage-Schnitt, kippt der kurzfristige Trend; viele behalten genau diese Linie im Blick. Gezählt wird nur der Tagesschluss um 24:00 UTC, ein Docht darunter während des Tages löst nichts aus. Die Kerze läuft als Scanner über BTC, ETH und SOL, jeder Coin meldet sich einzeln, einmal beim Kreuzen. Coins änderst du in der Kerze unter „Mehrere Coins“. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "m1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "m1.out", "to": "k1.b" },
+    { "from": "k1.out", "to": "t1.in" },
+    { "from": "k1.out", "to": "w1.in" }
+  ]
+}

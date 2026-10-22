@@ -1,0 +1,71 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "DOGE Pump-Melder",
+  "version": 1,
+  "description": "Plus 4 % in vier Stunden: Push und Telegram melden den Sprung, danach 12 Stunden Cooldown.",
+  "meta": {
+    "title": {
+      "de": "DOGE Pump-Melder",
+      "en": "DOGE Pump Alert"
+    },
+    "description": {
+      "de": "Plus 4 % in vier Stunden: Push und Telegram melden den Sprung, danach 12 Stunden Cooldown.",
+      "en": "Plus 4 % in four hours: push and Telegram report the jump, then a 12-hour cooldown."
+    },
+    "tags": [
+      "einsteiger",
+      "crash"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: schnelle Anstiege sofort sehen. Steigt DOGE in vier Stunden um mehr als 4 %, melden sich Push und Telegram. Danach hat jede Aktion 12 Stunden Cooldown.",
+        "en": "Idea: see fast rises right away. When DOGE gains more than 4 % in four hours, push and Telegram alert. Then each action has a 12-hour cooldown."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "▲ {{coin}} steigt in 4 Stunden um mehr als 4 % · {{werte}}",
+        "en": "▲ {{coin}} gains more than 4 % in 4 hours · {{values}}"
+      },
+      "t1": {
+        "de": "▲ {{coin}} steigt in 4 Stunden um mehr als 4 % · {{werte}}",
+        "en": "▲ {{coin}} gains more than 4 % in 4 hours · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "6 % statt 4 % meldet nur große Sprünge.",
+        "en": "6 % instead of 4 % reports only big jumps."
+      },
+      {
+        "de": "Mit 1 Kerze in Veränderung % zählt nur die letzte Stunde.",
+        "en": "With 1 candle in Change % only the last hour counts."
+      }
+    ],
+    "test": {
+      "alerts": 10,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "DOGE/USDT", "timeframe": "1h" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 110 }, "settings": { "length": 4 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 110 }, "settings": { "operator": "above", "value": 4 } },
+    { "id": "p1", "type": "core.push", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 12, "message": "▲ {{coin}} steigt in 4 Stunden um mehr als 4 % · {{werte}}" } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 12, "message": "▲ {{coin}} steigt in 4 Stunden um mehr als 4 % · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 280, "y": 330 },
+      "settings": { "text": "Idee: schnelle Anstiege sofort sehen. Steigt DOGE in vier Stunden um mehr als 4 %, melden sich Push und Telegram. Danach hat jede Aktion 12 Stunden Cooldown." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "g1.out", "to": "k1.in" },
+    { "from": "k1.out", "to": "p1.in" },
+    { "from": "k1.out", "to": "t1.in" }
+  ]
+}

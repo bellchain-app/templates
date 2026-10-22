@@ -1,0 +1,82 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "DOGE Volumen-Explosion",
+  "version": 1,
+  "description": "Dreifaches Volumen und mehr als 2 % Bewegung in einer Stunde: ▲ nach oben, ▼ nach unten.",
+  "meta": {
+    "title": {
+      "de": "DOGE Volumen-Explosion",
+      "en": "DOGE Volume Explosion"
+    },
+    "description": {
+      "de": "Dreifaches Volumen und mehr als 2 % Bewegung in einer Stunde: ▲ nach oben, ▼ nach unten.",
+      "en": "Triple volume and a move of more than 2 % in one hour: ▲ up, ▼ down."
+    },
+    "tags": [
+      "volumen"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Große Bewegungen mit viel Volumen haben mehr Gewicht. „Relativ“ im Baustein Volumen teilt das Volumen der Kerze durch den Durchschnitt der letzten 20; 3 heißt dreimal so viel wie üblich.",
+        "en": "Idea: big moves on high volume carry more weight. “Relative” in the Volume node divides the candle’s volume by the average of the last 20; 3 means three times the usual amount."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Volumen-Spitze nach oben · {{werte}}",
+        "en": "▲ {{coin}}: volume spike upwards · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: Volumen-Spitze nach unten · {{werte}}",
+        "en": "▼ {{coin}}: volume spike downwards · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Volumen über 4 meldet nur echte Ausreißer.",
+        "en": "Volume above 4 reports only real outliers."
+      },
+      {
+        "de": "Mit 15-Minuten-Kerzen siehst du Spitzen früher.",
+        "en": "With 15-minute candles you see spikes earlier."
+      }
+    ],
+    "test": {
+      "alerts": 17,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 140 }, "settings": { "exchange": "binance", "pair": "DOGE/USDT", "timeframe": "1h" } },
+    { "id": "v1", "type": "core.volume", "position": { "x": 280, "y": 100 }, "settings": { "length": 20 } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 254 }, "settings": { "length": 1 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 40 }, "settings": { "operator": "above", "value": 3 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 178 }, "settings": { "operator": "above", "value": 2 } },
+    { "id": "k3", "type": "core.compare", "position": { "x": 530, "y": 316 }, "settings": { "operator": "below", "value": -2 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 90 }, "settings": {} },
+    { "id": "a2", "type": "core.and", "position": { "x": 780, "y": 244 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 110 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: Volumen-Spitze nach oben · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 1030, "y": 248 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: Volumen-Spitze nach unten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 460 },
+      "settings": { "text": "Idee: Große Bewegungen mit viel Volumen haben mehr Gewicht. „Relativ“ im Baustein Volumen teilt das Volumen der Kerze durch den Durchschnitt der letzten 20; 3 heißt dreimal so viel wie üblich." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.volume", "to": "v1.in" },
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "v1.relative", "to": "k1.in" },
+    { "from": "g1.out", "to": "k2.in" },
+    { "from": "g1.out", "to": "k3.in" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "k1.out", "to": "a2.in0" },
+    { "from": "k3.out", "to": "a2.in1" },
+    { "from": "a1.out", "to": "t1.in" },
+    { "from": "a2.out", "to": "t2.in" }
+  ]
+}

@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bellchain.app/schema/chain-1.json",
+  "title": "Bellchain-Kette",
+  "description": "Eine Rule Chain aus Nodes und Verbindungen. Version 1 des Kettenformats.",
+  "type": "object",
+  "required": ["name", "version", "nodes", "edges"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Optionaler Verweis auf dieses Schema, für Editoren."
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120,
+      "description": "Name der Kette, erscheint in Nachrichten als {{kette}}."
+    },
+    "version": {
+      "const": 1,
+      "description": "Version des Kettenformats."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 2000
+    },
+    "meta": {
+      "$ref": "#/$defs/meta"
+    },
+    "pauseAfterAlert": {
+      "type": "boolean",
+      "description": "Einmalig: Nach dem ersten Alarm pausiert die Kette, etwa bei einem Preisalarm. Aktivieren schaltet sie wieder scharf."
+    },
+    "scanner": {
+      "$ref": "#/$defs/scanner"
+    },
+    "nodes": {
+      "type": "array",
+      "maxItems": 200,
+      "items": { "$ref": "#/$defs/node" }
+    },
+    "edges": {
+      "type": "array",
+      "maxItems": 1000,
+      "items": { "$ref": "#/$defs/edge" }
+    },
+    "customNodes": {
+      "type": "array",
+      "maxItems": 20,
+      "description": "Eigene Bausteine, die diese Kette nutzt. Nodes verweisen mit ihrer id (custom.…) darauf.",
+      "items": { "$ref": "#/$defs/customNode" }
+    }
+  },
+  "$defs": {
+    "nodeId": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}$",
+      "description": "Eindeutig innerhalb der Kette, ohne Punkt."
+    },
+    "nodeType": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*(\\.[a-z0-9][a-z0-9-]*)+(@[0-9]+(\\.[0-9]+){0,2})?$",
+      "description": "Node-Typ mit Namensraum, optional mit festgehaltener Version: core.rsi oder core.rsi@1."
+    },
+    "scanner": {
+      "type": "object",
+      "required": ["node"],
+      "additionalProperties": false,
+      "description": "Scanner: Die Kette läuft für jeden Coin einmal, die Kerze „node“ bekommt dabei sein Paar. Börse und Zeiteinheit bleiben die der Kerze. Die Coins sind entweder eine eigene Liste („pairs“) oder Top N nach Volumen („top“).",
+      "properties": {
+        "node": { "$ref": "#/$defs/nodeId" },
+        "pairs": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 100,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Z0-9]{1,15}/[A-Z0-9]{2,10}$",
+            "description": "Handelspaar wie in der Kerze, etwa ETH/USDT."
+          }
+        },
+        "top": {
+          "type": "object",
+          "required": ["count", "quote"],
+          "additionalProperties": false,
+          "description": "Top N nach Volumen: die „count“ Paare mit dem höchsten Umsatz der letzten 24 Stunden gegen „quote“ an der Börse der Kerze, ohne Stablecoins, Gold-, Hebel- und Aktien-Token. Die Liste kommt jeden Tag um 00:05 UTC neu.",
+          "properties": {
+            "count": { "type": "integer", "minimum": 1, "maximum": 100 },
+            "quote": {
+              "type": "string",
+              "pattern": "^[A-Z0-9]{2,10}$",
+              "description": "Gegenwährung wie im Paar, etwa USDT."
+            }
+          }
+        }
+      },
+      "oneOf": [
+        { "type": "object", "required": ["pairs"], "properties": { "pairs": true } },
+        { "type": "object", "required": ["top"], "properties": { "top": true } }
+      ]
+    },
+    "pinRef": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,31}\\.[a-z][A-Za-z0-9]{0,31}$",
+      "description": "Node und Pin als id.pin, etwa c1.close."
+    },
+    "localized": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "de": { "type": "string", "maxLength": 2000 },
+        "en": { "type": "string", "maxLength": 2000 }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Angaben für die Vorlagen-Galerie.",
+      "properties": {
+        "title": { "$ref": "#/$defs/localized" },
+        "description": { "$ref": "#/$defs/localized" },
+        "tags": {
+          "type": "array",
+          "maxItems": 12,
+          "items": { "type": "string", "minLength": 1, "maxLength": 40 }
+        },
+        "author": { "type": "string", "maxLength": 80 },
+        "source": { "type": "string", "maxLength": 200 },
+        "notes": {
+          "type": "object",
+          "description": "Text der Notizen je Sprache, nach Node-id. Wer die Vorlage verwendet, bekommt ihn als settings.text in der Sprache der Oberfläche.",
+          "maxProperties": 200,
+          "propertyNames": { "$ref": "#/$defs/nodeId" },
+          "additionalProperties": { "$ref": "#/$defs/localized" }
+        },
+        "messages": {
+          "type": "object",
+          "description": "Nachricht je Sprache, nach Node-id: settings.message einer Aktion oder settings.text einer Nachrichtenvorlage. Wer die Vorlage verwendet, bekommt sie in der Sprache der Oberfläche.",
+          "maxProperties": 200,
+          "propertyNames": { "$ref": "#/$defs/nodeId" },
+          "additionalProperties": { "$ref": "#/$defs/localized" }
+        },
+        "tips": {
+          "type": "array",
+          "description": "Tipps zum Anpassen der Vorlage, je Sprache.",
+          "maxItems": 8,
+          "items": { "$ref": "#/$defs/localized" }
+        },
+        "test": {
+          "type": "object",
+          "description": "Replay mit den Beispielkursen: so viele Alarme in so vielen Tagen bis zum Ende der Beispielkurse (Datum, UTC).",
+          "required": ["alerts", "days", "until"],
+          "additionalProperties": false,
+          "properties": {
+            "alerts": { "type": "integer", "minimum": 0, "maximum": 1000000 },
+            "days": { "type": "integer", "minimum": 1, "maximum": 3650 },
+            "until": { "type": "string", "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}$" }
+          }
+        }
+      }
+    },
+    "node": {
+      "type": "object",
+      "required": ["id", "type", "position", "settings"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/nodeId" },
+        "type": { "$ref": "#/$defs/nodeType" },
+        "position": {
+          "type": "object",
+          "required": ["x", "y"],
+          "additionalProperties": false,
+          "properties": {
+            "x": { "type": "number" },
+            "y": { "type": "number" }
+          }
+        },
+        "settings": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[a-z][a-zA-Z0-9]{0,31}$" },
+          "additionalProperties": {
+            "type": ["number", "string", "boolean"]
+          }
+        }
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": ["from", "to"],
+      "additionalProperties": false,
+      "properties": {
+        "from": { "$ref": "#/$defs/pinRef" },
+        "to": { "$ref": "#/$defs/pinRef" }
+      }
+    },
+    "text": {
+      "description": "Text in einer Sprache oder in beiden; fehlt eine, gilt die andere.",
+      "oneOf": [{ "type": "string", "maxLength": 1500 }, { "$ref": "#/$defs/localized" }]
+    },
+    "customPinId": {
+      "type": "string",
+      "pattern": "^[a-z][a-zA-Z0-9]{0,31}$",
+      "description": "Name, unter dem Formeln den Eingang, die Einstellung oder den Ausgang lesen."
+    },
+    "customPinType": {
+      "enum": ["price", "number", "signal"],
+      "description": "price = Kursreihe, number = Zahl, signal = wahr/falsch."
+    },
+    "customInput": {
+      "type": "object",
+      "required": ["id", "type"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/customPinId" },
+        "type": { "$ref": "#/$defs/customPinType" },
+        "label": { "$ref": "#/$defs/text" }
+      }
+    },
+    "customSetting": {
+      "type": "object",
+      "required": ["id", "default"],
+      "additionalProperties": false,
+      "description": "Eine Zahl, die man auf dem Board einstellt, etwa die Länge in Kerzen.",
+      "properties": {
+        "id": { "$ref": "#/$defs/customPinId" },
+        "label": { "$ref": "#/$defs/text" },
+        "help": { "$ref": "#/$defs/text" },
+        "default": { "type": "number" },
+        "min": { "type": "number" },
+        "max": { "type": "number" },
+        "step": { "type": "number" },
+        "integer": { "type": "boolean" }
+      }
+    },
+    "customOutput": {
+      "type": "object",
+      "required": ["id", "type", "formula"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "$ref": "#/$defs/customPinId" },
+        "type": { "$ref": "#/$defs/customPinType" },
+        "label": { "$ref": "#/$defs/text" },
+        "unit": { "const": "percent" },
+        "formula": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1000,
+          "description": "Formel, etwa (price - ema(price, length)) / ema(price, length) * 100"
+        }
+      }
+    },
+    "customNode": {
+      "type": "object",
+      "required": ["id", "version", "label", "inputs", "outputs"],
+      "additionalProperties": false,
+      "description": "Ein eigener Baustein: Eingänge, Einstellungen und Ausgänge mit Formeln. Format 1, siehe docs/node-spec.md.",
+      "properties": {
+        "$schema": { "type": "string" },
+        "format": { "const": 1 },
+        "id": { "type": "string", "pattern": "^custom\\.[a-z0-9][a-z0-9-]{0,47}$" },
+        "version": { "type": "string", "maxLength": 40 },
+        "label": { "$ref": "#/$defs/text" },
+        "description": { "$ref": "#/$defs/text" },
+        "help": { "$ref": "#/$defs/text" },
+        "sentence": { "$ref": "#/$defs/text" },
+        "category": { "enum": ["ind", "cond", "logic"] },
+        "icon": { "type": "string", "pattern": "^[a-z0-9-]{1,40}$" },
+        "author": { "type": "string", "maxLength": 80 },
+        "inputs": { "type": "array", "maxItems": 8, "items": { "$ref": "#/$defs/customInput" } },
+        "settings": { "type": "array", "maxItems": 8, "items": { "$ref": "#/$defs/customSetting" } },
+        "outputs": { "type": "array", "minItems": 1, "maxItems": 8, "items": { "$ref": "#/$defs/customOutput" } }
+      }
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "XRP zurück ins Bollinger-Band",
+  "version": 1,
+  "description": "Der Kurs schließt wieder über dem unteren Bollinger-Band, der RSI liegt noch unter 35.",
+  "meta": {
+    "title": {
+      "de": "XRP zurück ins Bollinger-Band",
+      "en": "XRP Back Inside the Bollinger Band"
+    },
+    "description": {
+      "de": "Der Kurs schließt wieder über dem unteren Bollinger-Band, der RSI liegt noch unter 35.",
+      "en": "The price closes back above the lower Bollinger Band while the RSI is still below 35."
+    },
+    "tags": [
+      "dip",
+      "volatilitaet"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Ein Fall unter das untere Band ist oft überdehnt. Spannend wird es, wenn der Kurs zurück ins Band kommt, solange der RSI noch überverkauft ist. Dann meldet sich ein Push.",
+        "en": "Idea: a drop below the lower band is often overstretched. It gets interesting when the price comes back inside the band while the RSI is still oversold. Then a push arrives."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "{{coin}} wieder im Bollinger-Band, RSI noch unter 35 · {{werte}}",
+        "en": "{{coin}} back inside the Bollinger Band, RSI still below 35 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Bandbreite 2,5 statt 2 meldet nur stärkere Ausschläge.",
+        "en": "A width of 2.5 instead of 2 reports only stronger swings."
+      },
+      {
+        "de": "Ohne die RSI-Bedingung zählt jede Rückkehr ins Band.",
+        "en": "Without the RSI condition every return into the band counts."
+      }
+    ],
+    "test": {
+      "alerts": 23,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 80 }, "settings": { "exchange": "binance", "pair": "XRP/USDT", "timeframe": "1h" } },
+    { "id": "b1", "type": "core.bb", "position": { "x": 280, "y": 40 }, "settings": { "length": 20, "mult": 2 } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 194 }, "settings": { "length": 14 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 50 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 188 }, "settings": { "operator": "below", "value": 35 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 110 }, "settings": {} },
+    { "id": "p1", "type": "core.push", "position": { "x": 1030, "y": 120 }, "settings": { "cooldown": 6, "message": "{{coin}} wieder im Bollinger-Band, RSI noch unter 35 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 340 },
+      "settings": { "text": "Idee: Ein Fall unter das untere Band ist oft überdehnt. Spannend wird es, wenn der Kurs zurück ins Band kommt, solange der RSI noch überverkauft ist. Dann meldet sich ein Push." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "b1.in" },
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "b1.lower", "to": "k1.b" },
+    { "from": "r1.out", "to": "k2.in" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "p1.in" }
+  ]
+}

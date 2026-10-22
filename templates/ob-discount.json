@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "LINK Order Block im Discount",
+  "version": 1,
+  "description": "Der Kurs läuft zum ersten Mal zurück in einen bullischen Order Block, der in der günstigen Hälfte der Spanne liegt.",
+  "meta": {
+    "title": {
+      "de": "LINK Order Block im Discount",
+      "en": "LINK Order Block in Discount"
+    },
+    "description": {
+      "de": "Der Kurs läuft zum ersten Mal zurück in einen bullischen Order Block, der in der günstigen Hälfte der Spanne liegt.",
+      "en": "The price returns for the first time to a bullish order block that sits in the cheap half of the range."
+    },
+    "tags": [
+      "smartmoney",
+      "dip"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Zwei Bedingungen zugleich: Der Kurs erreicht zum ersten Mal einen bullischen Order Block, die Kerze, von der ein Bruch nach oben ausging (Swings 10 · 10), und er liegt dabei im Discount, der unteren Hälfte der Spanne zwischen den letzten Swings. Viele Trader suchen Einstiege dort, wo eine Zone und ein günstiger Preis zusammenkommen.",
+        "en": "Two conditions at once: the price reaches a bullish order block for the first time, the candle a break upward started from (swings 10 · 10), and it sits in discount, the lower half of the range between the latest swings. Many traders look for entries where a zone and a cheap price come together."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} läuft in einen Order Block im Discount · {{werte}}",
+        "en": "▲ {{coin}} reaches an order block in discount · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit „Welche zählen: auch abgearbeitete“ meldet die Chain jeden Rücklauf in den Order Block, nicht nur den ersten.",
+        "en": "With “Which count: mitigated too” the chain alerts on every return to the order block, not just the first."
+      },
+      {
+        "de": "„Schluss im OB“ statt „Kurs erreicht OB“ meldet erst, wenn eine Kerze im Order Block schließt.",
+        "en": "“Close in OB” instead of “Price reaches OB” only alerts when a candle closes inside the order block."
+      },
+      {
+        "de": "Für Short: Order Block „bärisch“ und „im Premium“ statt „im Discount“.",
+        "en": "For shorts: order block “bearish” and “In premium” instead of “In discount”."
+      }
+    ],
+    "test": {
+      "alerts": 16,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "LINK/USDT", "timeframe": "1h" } },
+    { "id": "o1", "type": "core.order-blocks", "position": { "x": 330, "y": 40 }, "settings": { "side": "bullish", "mode": "fresh", "left": 10, "right": 10 } },
+    { "id": "p1", "type": "core.premium-discount", "position": { "x": 330, "y": 300 }, "settings": { "band": 5, "left": 10, "right": 10 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 630, "y": 170 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 900, "y": 170 }, "settings": { "cooldown": 6, "message": "▲ {{coin}} läuft in einen Order Block im Discount · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 580 },
+      "settings": { "text": "Zwei Bedingungen zugleich: Der Kurs erreicht zum ersten Mal einen bullischen Order Block, die Kerze, von der ein Bruch nach oben ausging (Swings 10 · 10), und er liegt dabei im Discount, der unteren Hälfte der Spanne zwischen den letzten Swings. Viele Trader suchen Einstiege dort, wo eine Zone und ein günstiger Preis zusammenkommen." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "o1.close" },
+    { "from": "c1.high", "to": "o1.high" },
+    { "from": "c1.low", "to": "o1.low" },
+    { "from": "c1.close", "to": "p1.close" },
+    { "from": "c1.high", "to": "p1.high" },
+    { "from": "c1.low", "to": "p1.low" },
+    { "from": "o1.enter", "to": "a1.in0" },
+    { "from": "p1.discount", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "SOL Momentum-Schub",
+  "version": 1,
+  "description": "Der RSI steigt über 70, während der Kurs über dem EMA 200 liegt: Der Aufwärtstrend nimmt Fahrt auf.",
+  "meta": {
+    "title": {
+      "de": "SOL Momentum-Schub",
+      "en": "SOL Momentum Burst"
+    },
+    "description": {
+      "de": "Der RSI steigt über 70, während der Kurs über dem EMA 200 liegt: Der Aufwärtstrend nimmt Fahrt auf.",
+      "en": "The RSI rises above 70 while the price is above the EMA 200: the uptrend picks up speed."
+    },
+    "tags": [
+      "momentum"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Stärke melden statt Schwäche. Ein RSI über 70 heißt nicht nur „überkauft“: Im Aufwärtstrend zeigt er oft einen kräftigen Schub. Der EMA 200 sorgt dafür, dass nur solche Schübe zählen.",
+        "en": "Idea: report strength instead of weakness. An RSI above 70 does not only mean “overbought”: in an uptrend it often shows a strong push. The EMA 200 makes sure only such pushes count."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: RSI über 70 im Aufwärtstrend · {{werte}}",
+        "en": "▲ {{coin}}: RSI above 70 in an uptrend · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 65 statt 70 kommen die Alarme früher und öfter.",
+        "en": "With 65 instead of 70 the alerts come earlier and more often."
+      },
+      {
+        "de": "Der Cooldown von 6 Stunden verhindert mehrere Alarme im selben Schub.",
+        "en": "The 6-hour cooldown prevents several alerts in the same push."
+      }
+    ],
+    "test": {
+      "alerts": 27,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "SOL/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 40 }, "settings": { "length": 14 } },
+    { "id": "e1", "type": "core.ma", "position": { "x": 280, "y": 178 }, "settings": { "kind": "ema", "length": 200 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "value": 70 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "above", "factor": 1 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 100 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 110 }, "settings": { "cooldown": 6, "message": "▲ {{coin}}: RSI über 70 im Aufwärtstrend · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Stärke melden statt Schwäche. Ein RSI über 70 heißt nicht nur „überkauft“: Im Aufwärtstrend zeigt er oft einen kräftigen Schub. Der EMA 200 sorgt dafür, dass nur solche Schübe zählen." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "e1.in" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "c1.close", "to": "k2.a" },
+    { "from": "e1.out", "to": "k2.b" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

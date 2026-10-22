@@ -1,0 +1,44 @@
+# Checks every template with the Bellchain check (scripts/check.mjs) on each push to main and each pull request.
+# No dependencies: the check is one file and runs with Node.js alone. Actions are pinned to commits; the version is
+# in the comment behind them.
+name: Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: check-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check templates
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+      - name: Only templates changed
+        if: github.event_name == 'pull_request'
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          other=$(git diff --name-only "origin/$BASE_REF...HEAD" -- . ':(exclude)templates/*.json')
+          if [ -n "$other" ]; then
+            echo "::error::Pull requests change only files in templates/. Please remove the other changes:"
+            echo "$other"
+            exit 1
+          fi
+      - name: Check
+        run: node scripts/check.mjs

@@ -1,0 +1,73 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Pi-Cycle-Top",
+  "version": 1,
+  "description": "Meldet, wenn der 111-Tage-Schnitt von BTC den doppelten 350-Tage-Schnitt nach oben kreuzt: der bekannte Pi-Cycle-Top.",
+  "meta": {
+    "title": {
+      "de": "BTC Pi-Cycle-Top",
+      "en": "BTC Pi Cycle Top"
+    },
+    "description": {
+      "de": "Meldet, wenn der 111-Tage-Schnitt von BTC den doppelten 350-Tage-Schnitt nach oben kreuzt: der bekannte Pi-Cycle-Top.",
+      "en": "Alerts when BTC’s 111-day average crosses above twice its 350-day average: the well-known Pi Cycle Top."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Der Pi-Cycle-Top vergleicht zwei gleitende Durchschnitte der Tagesschlüsse. Kreuzt der 111-Tage-Schnitt den doppelten 350-Tage-Schnitt nach oben, liegt der Kurs weit über seinem langen Trend; in früheren Zyklen fiel das Kreuzen in die Nähe großer Hochs. Das beruht auf wenigen Fällen und ist keine Regel. Das Signal kommt selten, in den Beispielkursen kein Mal, deshalb zeigt der Test 0 Alarme. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren.",
+        "en": "Idea: the Pi Cycle Top compares two moving averages of the daily closes. When the 111-day average crosses above twice the 350-day average, the price is far above its long-term trend; in earlier cycles the cross came close to major highs. That rests on few cases and is no rule. The signal is rare, not once in the sample prices, which is why the test shows 0 alerts. Enter your system’s https address in the webhook node; without it the chain cannot be activated."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "{{coin}}: Pi-Cycle-Top, 111-Tage-Schnitt über dem doppelten 350-Tage-Schnitt · {{werte}}",
+        "en": "{{coin}}: Pi Cycle Top, 111-day average above twice the 350-day average · {{values}}"
+      },
+      "w1": {
+        "de": "{{coin}}: Pi-Cycle-Top, 111-Tage-Schnitt über dem doppelten 350-Tage-Schnitt · {{werte}}",
+        "en": "{{coin}}: Pi Cycle Top, 111-day average above twice the 350-day average · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "„Kreuzt nach unten“ meldet, wenn der 111-Tage-Schnitt wieder unter den doppelten 350-Tage-Schnitt fällt.",
+        "en": "“Crosses below” reports when the 111-day average falls back below twice the 350-day average."
+      },
+      {
+        "de": "Mit Trader prüft das Replay 365 Tage; auch dann meldet die Chain meist nichts, so selten ist das Kreuzen.",
+        "en": "With Trader the replay covers 365 days; even then the chain usually reports nothing, the cross is that rare."
+      }
+    ],
+    "test": {
+      "alerts": 0,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1d" } },
+    { "id": "m1", "type": "core.ma", "position": { "x": 280, "y": 40 }, "settings": { "kind": "sma", "length": 111 } },
+    { "id": "m2", "type": "core.ma", "position": { "x": 280, "y": 260 }, "settings": { "kind": "sma", "length": 350 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 150 }, "settings": { "operator": "crossesAbove", "factor": 2 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 80 }, "settings": { "cooldown": 168, "message": "{{coin}}: Pi-Cycle-Top, 111-Tage-Schnitt über dem doppelten 350-Tage-Schnitt · {{werte}}" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 780, "y": 220 }, "settings": { "cooldown": 168, "message": "{{coin}}: Pi-Cycle-Top, 111-Tage-Schnitt über dem doppelten 350-Tage-Schnitt · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Der Pi-Cycle-Top vergleicht zwei gleitende Durchschnitte der Tagesschlüsse. Kreuzt der 111-Tage-Schnitt den doppelten 350-Tage-Schnitt nach oben, liegt der Kurs weit über seinem langen Trend; in früheren Zyklen fiel das Kreuzen in die Nähe großer Hochs. Das beruht auf wenigen Fällen und ist keine Regel. Das Signal kommt selten, in den Beispielkursen kein Mal, deshalb zeigt der Test 0 Alarme. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "m1.in" },
+    { "from": "c1.close", "to": "m2.in" },
+    { "from": "m1.out", "to": "k1.a" },
+    { "from": "m2.out", "to": "k1.b" },
+    { "from": "k1.out", "to": "t1.in" },
+    { "from": "k1.out", "to": "w1.in" }
+  ]
+}

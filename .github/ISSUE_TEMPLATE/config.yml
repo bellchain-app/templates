@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Docs · Doku
+    url: https://docs.bellchain.app/en/templates/
+    about: All templates with tips, and how the editor works · Alle Vorlagen mit Tipps und wie der Editor funktioniert
+  - name: Questions about your account · Fragen zu deinem Konto
+    url: mailto:support@bellchain.app
+    about: Plans, payments, alerts that don't arrive · Pläne, Zahlungen, Alarme, die nicht ankommen

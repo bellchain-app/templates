@@ -1,0 +1,84 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "SOL Ausbruch mit Volumen",
+  "version": 1,
+  "description": "Das 20er-Hoch wird geknackt und das Volumen liegt deutlich über dem Schnitt.",
+  "meta": {
+    "title": {
+      "de": "SOL Ausbruch mit Volumen",
+      "en": "SOL Breakout with Volume"
+    },
+    "description": {
+      "de": "Das 20er-Hoch wird geknackt und das Volumen liegt deutlich über dem Schnitt.",
+      "en": "The 20-candle high breaks and volume is well above average."
+    },
+    "tags": [
+      "ausbruch",
+      "volumen"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Ein Ausbruch zählt erst, wenn Volumen dahintersteht. Der Kurs kreuzt das Hoch der letzten 20 Kerzen nach oben, und das Volumen dieser Kerze liegt über dem 1,8-Fachen des Durchschnitts.",
+        "en": "Idea: a breakout only counts when volume backs it. The price crosses above the high of the last 20 candles, and this candle’s volume is above 1.8 times the average."
+      }
+    },
+    "messages": {
+      "x1": {
+        "de": "▲ {{coin}}: Ausbruch über das 20er-Hoch mit Volumen · {{werte}}",
+        "en": "▲ {{coin}}: breakout above the 20-candle high with volume · {{values}}"
+      },
+      "p1": {
+        "de": "▲ {{coin}}: Ausbruch über das 20er-Hoch mit Volumen · {{werte}}",
+        "en": "▲ {{coin}}: breakout above the 20-candle high with volume · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Faktor 2 statt 1,8 meldet nur stärkere Ausbrüche.",
+        "en": "Factor 2 instead of 1.8 reports only stronger breakouts."
+      },
+      {
+        "de": "50 Kerzen im Hoch/Tief ergeben ein deutlicheres Hoch.",
+        "en": "50 candles in High/Low give a more significant high."
+      },
+      {
+        "de": "„Vortag“ im Hoch/Tief meldet Ausbrüche über das gestrige Hoch.",
+        "en": "“Previous day” in High/Low reports breakouts above yesterday’s high."
+      }
+    ],
+    "test": {
+      "alerts": 35,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "SOL/USDT", "timeframe": "1h" } },
+    { "id": "h1", "type": "core.highlow", "position": { "x": 280, "y": 50 }, "settings": { "mode": "bars", "length": 20, "current": "exclude" } },
+    { "id": "v1", "type": "core.volume", "position": { "x": 280, "y": 290 }, "settings": { "length": 20 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 50 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 290 }, "settings": { "operator": "above", "factor": 1.8 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 170 }, "settings": {} },
+    { "id": "x1", "type": "core.telegram", "position": { "x": 1030, "y": 60 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: Ausbruch über das 20er-Hoch mit Volumen · {{werte}}" } },
+    { "id": "p1", "type": "core.push", "position": { "x": 1030, "y": 280 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: Ausbruch über das 20er-Hoch mit Volumen · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 450 },
+      "settings": { "text": "Idee: Ein Ausbruch zählt erst, wenn Volumen dahintersteht. Der Kurs kreuzt das Hoch der letzten 20 Kerzen nach oben, und das Volumen dieser Kerze liegt über dem 1,8-Fachen des Durchschnitts." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "h1.in" },
+    { "from": "c1.volume", "to": "v1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "h1.high", "to": "k1.b" },
+    { "from": "c1.volume", "to": "k2.a" },
+    { "from": "v1.average", "to": "k2.b" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "x1.in" },
+    { "from": "a1.out", "to": "p1.in" }
+  ]
+}

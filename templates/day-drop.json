@@ -1,0 +1,64 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "AVAX Tagesverlust per E-Mail",
+  "version": 1,
+  "description": "Minus 7 % in 24 Stunden: eine E-Mail, höchstens eine pro Tag.",
+  "meta": {
+    "title": {
+      "de": "AVAX Tagesverlust per E-Mail",
+      "en": "AVAX Daily Loss by Email"
+    },
+    "description": {
+      "de": "Minus 7 % in 24 Stunden: eine E-Mail, höchstens eine pro Tag.",
+      "en": "Minus 7 % in 24 hours: one email, at most one a day."
+    },
+    "tags": [
+      "crash"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Ein großer Tagesverlust ist selten eilig, aber wichtig. Die E-Mail kommt, wenn AVAX in 24 Stunden mehr als 7 % verliert; der Cooldown von 24 Stunden hält das Postfach ruhig.",
+        "en": "Idea: a big daily loss is rarely urgent, but important. The email arrives when AVAX loses more than 7 % in 24 hours; the 24-hour cooldown keeps your inbox calm."
+      }
+    },
+    "messages": {
+      "e1": {
+        "de": "▼ {{coin}} −7 % in 24 Stunden · {{werte}}",
+        "en": "▼ {{coin}} −7 % in 24 hours · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Den Betreff stellst du in der E-Mail-Aktion ein.",
+        "en": "Set the subject in the email action."
+      },
+      {
+        "de": "Mit Push statt E-Mail kommt der Alarm aufs Handy.",
+        "en": "With push instead of email the alert reaches your phone."
+      }
+    ],
+    "test": {
+      "alerts": 6,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 40 }, "settings": { "exchange": "binance", "pair": "AVAX/USDT", "timeframe": "1h" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 80 }, "settings": { "length": 24 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 80 }, "settings": { "operator": "below", "value": -7 } },
+    { "id": "e1", "type": "core.email", "position": { "x": 780, "y": 80 }, "settings": { "cooldown": 24, "message": "▼ {{coin}} −7 % in 24 Stunden · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 280, "y": 260 },
+      "settings": { "text": "Idee: Ein großer Tagesverlust ist selten eilig, aber wichtig. Die E-Mail kommt, wenn AVAX in 24 Stunden mehr als 7 % verliert; der Cooldown von 24 Stunden hält das Postfach ruhig." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "g1.out", "to": "k1.in" },
+    { "from": "k1.out", "to": "e1.in" }
+  ]
+}

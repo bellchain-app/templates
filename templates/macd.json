@@ -1,0 +1,84 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH MACD-Wende",
+  "version": 1,
+  "description": "Der MACD kreuzt seine Signallinie: ▲ unter der Nulllinie nach oben, ▼ über ihr nach unten.",
+  "meta": {
+    "title": {
+      "de": "ETH MACD-Wende",
+      "en": "ETH MACD Turn"
+    },
+    "description": {
+      "de": "Der MACD kreuzt seine Signallinie: ▲ unter der Nulllinie nach oben, ▼ über ihr nach unten.",
+      "en": "The MACD crosses its signal line: ▲ upwards below the zero line, ▼ downwards above it."
+    },
+    "tags": [
+      "momentum"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Wenden des Momentums dort, wo sie am meisten zählen. Kreuzt der MACD seine Signallinie nach oben, solange er noch unter null liegt, dreht ein Abwärtsschwung. Über null nach unten dreht ebenso ein Aufwärtsschwung.",
+        "en": "Idea: momentum turns where they matter most. When the MACD crosses its signal line upwards while still below zero, a downswing turns. Above zero and downwards, an upswing turns the same way."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: MACD dreht unter null nach oben · {{werte}}",
+        "en": "▲ {{coin}}: MACD turns up below zero · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: MACD dreht über null nach unten · {{werte}}",
+        "en": "▼ {{coin}}: MACD turns down above zero · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Ohne die Bedingung an der Nulllinie meldet die Chain jede Kreuzung.",
+        "en": "Without the zero-line condition the chain reports every cross."
+      },
+      {
+        "de": "Mit 1-Stunden-Kerzen kommen die Wenden früher, aber deutlich öfter.",
+        "en": "With 1-hour candles the turns come earlier but much more often."
+      }
+    ],
+    "test": {
+      "alerts": 30,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 210 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "4h" } },
+    { "id": "m1", "type": "core.macd", "position": { "x": 280, "y": 240 }, "settings": { "fast": 12, "slow": 26, "signal": 9 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 178 }, "settings": { "operator": "below", "value": 0 } },
+    { "id": "k3", "type": "core.compare-ab", "position": { "x": 530, "y": 316 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "k4", "type": "core.compare", "position": { "x": 530, "y": 454 }, "settings": { "operator": "above", "value": 0 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 160 }, "settings": {} },
+    { "id": "a2", "type": "core.and", "position": { "x": 780, "y": 314 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 180 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: MACD dreht unter null nach oben · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 1030, "y": 318 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: MACD dreht über null nach unten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 600 },
+      "settings": { "text": "Idee: Wenden des Momentums dort, wo sie am meisten zählen. Kreuzt der MACD seine Signallinie nach oben, solange er noch unter null liegt, dreht ein Abwärtsschwung. Über null nach unten dreht ebenso ein Aufwärtsschwung." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "m1.in" },
+    { "from": "m1.macd", "to": "k1.a" },
+    { "from": "m1.signal", "to": "k1.b" },
+    { "from": "m1.macd", "to": "k2.in" },
+    { "from": "m1.macd", "to": "k3.a" },
+    { "from": "m1.signal", "to": "k3.b" },
+    { "from": "m1.macd", "to": "k4.in" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "k3.out", "to": "a2.in0" },
+    { "from": "k4.out", "to": "a2.in1" },
+    { "from": "a1.out", "to": "t1.in" },
+    { "from": "a2.out", "to": "t2.in" }
+  ]
+}

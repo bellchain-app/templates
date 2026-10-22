@@ -1,0 +1,79 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Rücklauf zur Ausbruchsmarke 87.083 $",
+  "version": 1,
+  "description": "Nach einem Tagesschluss über 87.083 $ meldet die Chain, wenn BTC binnen 20 Tagen bis auf ±1 % an den Ausbruchskurs zurückkommt.",
+  "meta": {
+    "title": {
+      "de": "BTC Rücklauf zur Ausbruchsmarke 87.083 $",
+      "en": "BTC Pullback to the $87,083 Breakout Level"
+    },
+    "description": {
+      "de": "Nach einem Tagesschluss über 87.083 $ meldet die Chain, wenn BTC binnen 20 Tagen bis auf ±1 % an den Ausbruchskurs zurückkommt.",
+      "en": "After a daily close above $87,083, alerts when BTC comes back within ±1 % of the breakout price within 20 days."
+    },
+    "tags": [
+      "ausbruch",
+      "levels"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Nach einem Ausbruch kehrt der Kurs oft noch einmal zur Ausbruchsmarke zurück, bevor er weiterläuft oder scheitert. Der Vergleich meldet den Tagesschluss, der 87.083 $ nach oben kreuzt, Wert bei Signal merkt sich diesen Schluss, und „nahe“ meldet, wenn der Kurs danach bis auf ±1 % zurückkommt; Danach begrenzt das auf die ersten 20 Tage nach dem Ausbruch. In den Beispielkursen schloss BTC nie über der Marke, deshalb zeigt der Test 0 Alarme. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren.",
+        "en": "Idea: after a breakout the price often returns to the breakout level once more before it moves on or fails. The comparison reports the daily close that crosses above $87,083, Value at signal remembers that close, and “near” reports when the price comes back within ±1 % afterwards; Then limits this to the first 20 days after the breakout. In the sample prices BTC never closed above the level, which is why the test shows 0 alerts. Enter your system’s https address in the webhook node; without it the chain cannot be activated."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} zurück am Ausbruchskurs über 87.083 $ · {{werte}}",
+        "en": "▲ {{coin}} back at the breakout price above $87,083 · {{values}}"
+      },
+      "w1": {
+        "de": "▲ {{coin}} zurück am Ausbruchskurs über 87.083 $ · {{werte}}",
+        "en": "▲ {{coin}} back at the breakout price above $87,083 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Die Marke stellst du im Vergleich ein; Wert bei Signal merkt sich den Schluss beim Ausbruch von selbst.",
+        "en": "You set the level in the comparison; Value at signal remembers the close at the breakout by itself."
+      },
+      {
+        "de": "Ohne feste Marke geht es mit dem Hoch der letzten Kerzen, wie in der Vorlage „SOL Rücklauf zum Ausbruch“.",
+        "en": "Without a fixed level it works with the high of the last candles, as in the template “SOL Pullback to the Breakout”."
+      },
+      {
+        "de": "Mit Band ±2 % zählen auch Rückläufe, die den Ausbruchskurs nicht ganz erreichen.",
+        "en": "With a band of ±2 % pullbacks that don’t quite reach the breakout price count too."
+      }
+    ],
+    "test": {
+      "alerts": 0,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1d" } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 280, "y": 40 }, "settings": { "operator": "crossesAbove", "value": 87083 } },
+    { "id": "v1", "type": "core.value-when", "position": { "x": 530, "y": 200 }, "settings": { "width": 1 } },
+    { "id": "s1", "type": "core.sequence", "position": { "x": 780, "y": 120 }, "settings": { "bars": 20 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 60 }, "settings": { "cooldown": 24, "message": "▲ {{coin}} zurück am Ausbruchskurs über 87.083 $ · {{werte}}" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 1030, "y": 200 }, "settings": { "cooldown": 24, "message": "▲ {{coin}} zurück am Ausbruchskurs über 87.083 $ · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Nach einem Ausbruch kehrt der Kurs oft noch einmal zur Ausbruchsmarke zurück, bevor er weiterläuft oder scheitert. Der Vergleich meldet den Tagesschluss, der 87.083 $ nach oben kreuzt, Wert bei Signal merkt sich diesen Schluss, und „nahe“ meldet, wenn der Kurs danach bis auf ±1 % zurückkommt; Danach begrenzt das auf die ersten 20 Tage nach dem Ausbruch. In den Beispielkursen schloss BTC nie über der Marke, deshalb zeigt der Test 0 Alarme. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "k1.in" },
+    { "from": "c1.close", "to": "v1.in" },
+    { "from": "k1.out", "to": "v1.signal" },
+    { "from": "k1.out", "to": "s1.first" },
+    { "from": "v1.near", "to": "s1.then" },
+    { "from": "s1.out", "to": "t1.in" },
+    { "from": "s1.out", "to": "w1.in" }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "Große Bewegungen in 9 Coins",
+  "version": 1,
+  "description": "Bewegt sich einer der 9 Coins in einer Stunde um mehr als 4 %, kommt ein Push mit dem Coin.",
+  "meta": {
+    "title": {
+      "de": "Große Bewegungen in 9 Coins",
+      "en": "Big Moves Across 9 Coins"
+    },
+    "description": {
+      "de": "Bewegt sich einer der 9 Coins in einer Stunde um mehr als 4 %, kommt ein Push mit dem Coin.",
+      "en": "When one of the 9 coins moves more than 4 % within an hour, a push names the coin."
+    },
+    "tags": [
+      "scanner",
+      "crash"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Pumps und Dumps im Blick, ohne neun Chains. „Veränderung %“ misst je Coin die letzte Stunde, „Bereich“ meldet alles außerhalb von −4 bis +4 %. Die Kerze läuft als Scanner, jeder Coin hat seinen eigenen Cooldown von 2 Stunden. Bewegt sich der ganze Markt, kommt eine Nachricht mit allen Coins der Stunde.",
+        "en": "Idea: pumps and dumps in view without nine chains. “Change %” measures the last hour per coin, “Range” reports anything outside −4 to +4 %. The candle runs as a scanner, each coin has its own cooldown of 2 hours. If the whole market moves, one message lists all coins of the hour."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "⚡ {{coin}}: große Bewegung in einer Stunde · {{werte}}",
+        "en": "⚡ {{coin}}: big move within an hour · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "3 statt 4 in den Grenzen von „Bereich“ meldet auch kleinere Sprünge, etwa doppelt so oft.",
+        "en": "3 instead of 4 in the limits of “Range” also reports smaller jumps, about twice as often."
+      },
+      {
+        "de": "Nur Anstiege: „Bereich“ durch „Vergleich“ mit „mindestens 4“ ersetzen.",
+        "en": "Rises only: replace “Range” with “Comparison” set to “at least 4”."
+      }
+    ],
+    "test": {
+      "alerts": 42,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "scanner": {
+    "node": "c1",
+    "pairs": [
+      "BTC/USDT",
+      "ETH/USDT",
+      "SOL/USDT",
+      "XRP/USDT",
+      "BNB/USDT",
+      "DOGE/USDT",
+      "ADA/USDT",
+      "AVAX/USDT",
+      "LINK/USDT"
+    ]
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 60 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 60 }, "settings": { "length": 1 } },
+    { "id": "b1", "type": "core.range", "position": { "x": 530, "y": 60 }, "settings": { "mode": "outside", "low": -4, "high": 4 } },
+    { "id": "p1", "type": "core.push", "position": { "x": 780, "y": 60 }, "settings": { "cooldown": 2, "message": "⚡ {{coin}}: große Bewegung in einer Stunde · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 260 },
+      "settings": { "text": "Idee: Pumps und Dumps im Blick, ohne neun Chains. „Veränderung %“ misst je Coin die letzte Stunde, „Bereich“ meldet alles außerhalb von −4 bis +4 %. Die Kerze läuft als Scanner, jeder Coin hat seinen eigenen Cooldown von 2 Stunden. Bewegt sich der ganze Markt, kommt eine Nachricht mit allen Coins der Stunde." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "g1.out", "to": "b1.in" },
+    { "from": "b1.out", "to": "p1.in" }
+  ]
+}

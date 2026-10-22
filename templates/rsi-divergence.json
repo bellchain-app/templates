@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC RSI-Divergenz",
+  "version": 1,
+  "description": "Der Kurs macht ein tieferes Tief, der RSI ein höheres (▲), oder ein höheres Hoch bei tieferem RSI (▼).",
+  "meta": {
+    "title": {
+      "de": "BTC RSI-Divergenz",
+      "en": "BTC RSI Divergence"
+    },
+    "description": {
+      "de": "Der Kurs macht ein tieferes Tief, der RSI ein höheres (▲), oder ein höheres Hoch bei tieferem RSI (▼).",
+      "en": "The price makes a lower low while the RSI makes a higher one (▲), or a higher high with a lower RSI (▼)."
+    },
+    "tags": [
+      "momentum"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Läuft der Kurs auf ein neues Tief, der RSI aber nicht mehr, verliert der Abverkauf an Schwung; oben spiegelbildlich. Die Divergenz vergleicht zwei aufeinanderfolgende Tiefs oder Hochs des RSI, 5 bis 60 Kerzen auseinander, und meldet sich, sobald das zweite feststeht: 5 Kerzen danach, nie rückwirkend.",
+        "en": "Idea: if the price runs to a new low but the RSI no longer does, the sell-off is losing momentum; mirrored at the top. The divergence compares two consecutive lows or highs of the RSI, 5 to 60 candles apart, and reports as soon as the second one is confirmed: 5 candles later, never in hindsight."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: bullische RSI-Divergenz · {{werte}}",
+        "en": "▲ {{coin}}: bullish RSI divergence · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: bärische RSI-Divergenz · {{werte}}",
+        "en": "▼ {{coin}}: bearish RSI divergence · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit der Art „Versteckt“ meldet die Divergenz Rücksetzer im Trend statt möglicher Wenden.",
+        "en": "With the type “Hidden” the divergence reports pullbacks within the trend instead of possible reversals."
+      },
+      {
+        "de": "Statt des RSI geht jeder Oszillator, etwa MACD oder MFI.",
+        "en": "Any oscillator works instead of the RSI, such as MACD or MFI."
+      },
+      {
+        "de": "3 Kerzen danach statt 5 melden früher, aber auch bei kleineren Tiefs.",
+        "en": "3 candles after instead of 5 report sooner, but also for smaller lows."
+      }
+    ],
+    "test": {
+      "alerts": 25,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 300, "y": 40 }, "settings": { "length": 14, "oversold": 30, "overbought": 70 } },
+    { "id": "d1", "type": "core.divergence", "position": { "x": 560, "y": 150 }, "settings": { "kind": "regular", "left": 5, "right": 5, "minBars": 5, "maxBars": 60 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 840, "y": 60 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: bullische RSI-Divergenz · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 840, "y": 260 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: bärische RSI-Divergenz · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Läuft der Kurs auf ein neues Tief, der RSI aber nicht mehr, verliert der Abverkauf an Schwung; oben spiegelbildlich. Die Divergenz vergleicht zwei aufeinanderfolgende Tiefs oder Hochs des RSI, 5 bis 60 Kerzen auseinander, und meldet sich, sobald das zweite feststeht: 5 Kerzen danach, nie rückwirkend." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "r1.out", "to": "d1.osc" },
+    { "from": "c1.high", "to": "d1.high" },
+    { "from": "c1.low", "to": "d1.low" },
+    { "from": "d1.bull", "to": "t1.in" },
+    { "from": "d1.bear", "to": "t2.in" }
+  ]
+}

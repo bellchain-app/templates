@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Rücklauf in ein Fair Value Gap",
+  "version": 1,
+  "description": "Im Aufwärtstrend fällt der Kurs zurück in eine offene Aufwärtslücke ab 0,3 %.",
+  "meta": {
+    "title": {
+      "de": "ETH Rücklauf in ein Fair Value Gap",
+      "en": "ETH Pullback into a Fair Value Gap"
+    },
+    "description": {
+      "de": "Im Aufwärtstrend fällt der Kurs zurück in eine offene Aufwärtslücke ab 0,3 %.",
+      "en": "In an uptrend, the price falls back into an open up gap of 0.3 % or more."
+    },
+    "tags": [
+      "smartmoney",
+      "dip"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Zwei Bedingungen zugleich: Die Marktstruktur (Swings 10 · 10) zeigt einen Aufwärtstrend, und der Kurs läuft zum ersten Mal zurück in eine offene Aufwärtslücke von mindestens 0,3 %. Solche Lücken hinterlässt ein schneller Anstieg; viele Trader erwarten, dass der Kurs dort Halt findet, bevor er weiter steigt.",
+        "en": "Two conditions at once: market structure (swings 10 · 10) shows an uptrend, and the price returns for the first time into an open up gap of at least 0.3 %. A fast rise leaves such gaps behind; many traders expect the price to find support there before it rises further."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "{{coin}} läuft im Aufwärtstrend zurück in eine Lücke · {{werte}}",
+        "en": "{{coin}} pulls back into a gap in an uptrend · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit „Schluss in Lücke“ statt „Kurs läuft in Lücke“ meldet die Chain erst, wenn eine Kerze in der Lücke schließt.",
+        "en": "With “close in gap” instead of “price enters gap” the chain only alerts when a candle closes inside the gap."
+      },
+      {
+        "de": "Mindestgröße 0,5 % lässt nur deutliche Lücken zählen; das Bild in den Eigenschaften zeigt kleinere als Umriss.",
+        "en": "A minimum size of 0.5 % counts only clear gaps; the chart in the properties shows smaller ones as outlines."
+      },
+      {
+        "de": "„gefüllt %“ mit einem Vergleich ab 50 meldet, wenn der Kurs die halbe Lücke erreicht.",
+        "en": "“Filled %” with a compare from 50 alerts when the price reaches half of the gap."
+      }
+    ],
+    "test": {
+      "alerts": 33,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "1h" } },
+    { "id": "s1", "type": "core.structure", "position": { "x": 330, "y": 40 }, "settings": { "left": 10, "right": 10, "trigger": "close" } },
+    { "id": "f1", "type": "core.fvg", "position": { "x": 330, "y": 300 }, "settings": { "side": "up", "minSize": 0.3 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 630, "y": 170 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 900, "y": 170 }, "settings": { "cooldown": 6, "message": "{{coin}} läuft im Aufwärtstrend zurück in eine Lücke · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 520 },
+      "settings": { "text": "Zwei Bedingungen zugleich: Die Marktstruktur (Swings 10 · 10) zeigt einen Aufwärtstrend, und der Kurs läuft zum ersten Mal zurück in eine offene Aufwärtslücke von mindestens 0,3 %. Solche Lücken hinterlässt ein schneller Anstieg; viele Trader erwarten, dass der Kurs dort Halt findet, bevor er weiter steigt." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "c1.close", "to": "f1.close" },
+    { "from": "c1.high", "to": "f1.high" },
+    { "from": "c1.low", "to": "f1.low" },
+    { "from": "s1.bullish", "to": "a1.in0" },
+    { "from": "f1.enter", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

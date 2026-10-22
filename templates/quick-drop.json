@@ -1,0 +1,65 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Rücksetzer in einer Stunde",
+  "version": 1,
+  "description": "Minus 2 % in einer Stunde, gemessen auf 15-Minuten-Kerzen. Ein Push, dann 3 Stunden Cooldown.",
+  "meta": {
+    "title": {
+      "de": "ETH Rücksetzer in einer Stunde",
+      "en": "ETH One-Hour Drop"
+    },
+    "description": {
+      "de": "Minus 2 % in einer Stunde, gemessen auf 15-Minuten-Kerzen. Ein Push, dann 3 Stunden Cooldown.",
+      "en": "Minus 2 % in one hour, measured on 15-minute candles. One push, then a 3-hour cooldown."
+    },
+    "tags": [
+      "einsteiger",
+      "crash"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Rücksetzer früh sehen. Vier 15-Minuten-Kerzen ergeben eine Stunde; fällt ETH darin um mehr als 2 %, kommt ein Push. 15 Minuten ist die kürzeste Zeiteinheit in Free.",
+        "en": "Idea: spot drops early. Four 15-minute candles make one hour; if ETH falls more than 2 % in that time, a push arrives. 15 minutes is the shortest timeframe on Free."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "▼ {{coin}} −2 % in einer Stunde · {{werte}}",
+        "en": "▼ {{coin}} −2 % within an hour · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 8 Kerzen misst die Chain zwei Stunden.",
+        "en": "With 8 candles the chain measures two hours."
+      },
+      {
+        "de": "Im Plan Pro gehen auch 1- und 5-Minuten-Kerzen.",
+        "en": "On the Pro plan, 1- and 5-minute candles work too."
+      }
+    ],
+    "test": {
+      "alerts": 12,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 40 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "15m" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 80 }, "settings": { "length": 4 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 80 }, "settings": { "operator": "below", "value": -2 } },
+    { "id": "p1", "type": "core.push", "position": { "x": 780, "y": 80 }, "settings": { "cooldown": 3, "message": "▼ {{coin}} −2 % in einer Stunde · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 280, "y": 260 },
+      "settings": { "text": "Idee: Rücksetzer früh sehen. Vier 15-Minuten-Kerzen ergeben eine Stunde; fällt ETH darin um mehr als 2 %, kommt ein Push. 15 Minuten ist die kürzeste Zeiteinheit in Free." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "g1.out", "to": "k1.in" },
+    { "from": "k1.out", "to": "p1.in" }
+  ]
+}

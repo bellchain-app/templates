@@ -1,0 +1,79 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC VWAP-Rückeroberung",
+  "version": 1,
+  "description": "Der Kurs kreuzt den Tages-VWAP mit doppeltem Volumen nach oben, nur zwischen 8 und 22 Uhr.",
+  "meta": {
+    "title": {
+      "de": "BTC VWAP-Rückeroberung",
+      "en": "BTC VWAP Reclaim"
+    },
+    "description": {
+      "de": "Der Kurs kreuzt den Tages-VWAP mit doppeltem Volumen nach oben, nur zwischen 8 und 22 Uhr.",
+      "en": "The price crosses above the daily VWAP with double volume, only between 8 AM and 10 PM."
+    },
+    "tags": [
+      "levels",
+      "volumen",
+      "zeit"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Der VWAP ist der Durchschnittspreis des Tages, gewichtet mit dem Volumen. Holt sich der Kurs ihn mit kräftigem Volumen zurück, übernehmen oft die Käufer. Das Zeitfenster hält die Nacht frei.",
+        "en": "Idea: the VWAP is the day’s average price, weighted by volume. When the price reclaims it on strong volume, buyers often take over. The time window keeps your nights free."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "▲ {{coin}} zurück über dem VWAP, mit Volumen · {{werte}}",
+        "en": "▲ {{coin}} back above the VWAP, with volume · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Das Zeitfenster gilt in der Zeitzone, die du im Baustein einstellst.",
+        "en": "The time window uses the time zone set in the node."
+      },
+      {
+        "de": "Mit Neustart „Woche“ rechnet der VWAP ab Montag.",
+        "en": "With reset “week” the VWAP counts from Monday."
+      }
+    ],
+    "test": {
+      "alerts": 20,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 140 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "15m" } },
+    { "id": "w1", "type": "core.vwap", "position": { "x": 280, "y": 80 }, "settings": { "anchor": "day", "timezone": "UTC", "mult": 1 } },
+    { "id": "v1", "type": "core.volume", "position": { "x": 280, "y": 262 }, "settings": { "length": 20 } },
+    { "id": "z1", "type": "core.timewindow", "position": { "x": 530, "y": 40 }, "settings": { "from": 8, "to": 22, "days": "all", "timezone": "Europe/Berlin" } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 316 }, "settings": { "operator": "above", "value": 2 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 160 }, "settings": {} },
+    { "id": "p1", "type": "core.push", "position": { "x": 1030, "y": 180 }, "settings": { "cooldown": 4, "message": "▲ {{coin}} zurück über dem VWAP, mit Volumen · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 460 },
+      "settings": { "text": "Idee: Der VWAP ist der Durchschnittspreis des Tages, gewichtet mit dem Volumen. Holt sich der Kurs ihn mit kräftigem Volumen zurück, übernehmen oft die Käufer. Das Zeitfenster hält die Nacht frei." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "w1.close" },
+    { "from": "c1.high", "to": "w1.high" },
+    { "from": "c1.low", "to": "w1.low" },
+    { "from": "c1.volume", "to": "w1.volume" },
+    { "from": "c1.volume", "to": "v1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "w1.out", "to": "k1.b" },
+    { "from": "v1.relative", "to": "k2.in" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "z1.out", "to": "a1.in2" },
+    { "from": "a1.out", "to": "p1.in" }
+  ]
+}

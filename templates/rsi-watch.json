@@ -1,0 +1,73 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "LINK RSI-Beobachter",
+  "version": 1,
+  "description": "Schreibt RSI unter 25 und über 75 nur in den Verlauf, ohne Benachrichtigung.",
+  "meta": {
+    "title": {
+      "de": "LINK RSI-Beobachter",
+      "en": "LINK RSI Watcher"
+    },
+    "description": {
+      "de": "Schreibt RSI unter 25 und über 75 nur in den Verlauf, ohne Benachrichtigung.",
+      "en": "Writes RSI below 25 and above 75 to the history only, without notifications."
+    },
+    "tags": [
+      "einsteiger",
+      "momentum"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: erst beobachten, dann benachrichtigen. „Nur protokollieren“ schreibt jeden Alarm in den Verlauf der Chain, ohne dich zu stören. Passt die Auswahl nach ein paar Tagen, tausch die Aktionen gegen Push oder Telegram.",
+        "en": "Idea: watch first, notify later. “Log only” writes every alert to the chain’s history without disturbing you. Once the selection looks right after a few days, swap the actions for push or Telegram."
+      }
+    },
+    "messages": {
+      "l1": {
+        "de": "{{coin}}: RSI unter 25 · {{werte}}",
+        "en": "{{coin}}: RSI below 25 · {{values}}"
+      },
+      "l2": {
+        "de": "{{coin}}: RSI über 75 · {{werte}}",
+        "en": "{{coin}}: RSI above 75 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "30 und 70 sind die üblichen Grenzen.",
+        "en": "30 and 70 are the usual levels."
+      },
+      {
+        "de": "Das Replay zeigt vorher, wie oft die Chain in den Verlauf schreiben würde.",
+        "en": "The replay shows beforehand how often the chain would write to the history."
+      }
+    ],
+    "test": {
+      "alerts": 28,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "LINK/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 110 }, "settings": { "length": 14 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 40 }, "settings": { "operator": "below", "value": 25 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 178 }, "settings": { "operator": "above", "value": 75 } },
+    { "id": "l1", "type": "core.log", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 4, "message": "{{coin}}: RSI unter 25 · {{werte}}" } },
+    { "id": "l2", "type": "core.log", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 4, "message": "{{coin}}: RSI über 75 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: erst beobachten, dann benachrichtigen. „Nur protokollieren“ schreibt jeden Alarm in den Verlauf der Chain, ohne dich zu stören. Passt die Auswahl nach ein paar Tagen, tausch die Aktionen gegen Push oder Telegram." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "r1.out", "to": "k2.in" },
+    { "from": "k1.out", "to": "l1.in" },
+    { "from": "k2.out", "to": "l2.in" }
+  ]
+}

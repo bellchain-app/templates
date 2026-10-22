@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "SOL Sweep unter das Tief, dann Wende",
+  "version": 1,
+  "description": "Erst sticht der Kurs unter ein Swing-Tief und schließt wieder darüber, dann bricht die Struktur innerhalb von 24 Kerzen nach oben.",
+  "meta": {
+    "title": {
+      "de": "SOL Sweep unter das Tief, dann Wende",
+      "en": "SOL Sweep Below the Low, Then Reversal"
+    },
+    "description": {
+      "de": "Erst sticht der Kurs unter ein Swing-Tief und schließt wieder darüber, dann bricht die Struktur innerhalb von 24 Kerzen nach oben.",
+      "en": "First the price spikes below a swing low and closes back above it, then the structure breaks upward within 24 candles."
+    },
+    "tags": [
+      "smartmoney",
+      "konfluenz"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Ein klassisches Muster aus dem Smart-Money-Handel in zwei Schritten: Erst sticht der Kurs unter ein Swing-Tief (Swings 10 · 10) und schließt in derselben Kerze wieder darüber, die Stopps darunter sind abgeholt. „Danach“ wartet dann bis zu 24 Kerzen auf einen Wechsel des Charakters nach oben in der kleineren Struktur (Swings 5 · 5). Erst wenn beides in dieser Reihenfolge passiert, kommt der Alarm.",
+        "en": "A classic smart money pattern in two steps: first the price spikes below a swing low (swings 10 · 10) and closes back above it in the same candle, the stops below are taken. “Then” waits up to 24 candles for a change of character upward in the smaller structure (swings 5 · 5). Only when both happen in that order does the alert come."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Liquidität unter dem Tief geholt, dann Struktur nach oben gebrochen · {{werte}}",
+        "en": "▲ {{coin}}: liquidity below the low taken, then structure broke upward · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit „nur gleiche Hochs und Tiefs“ im Sweep zählen nur Stellen mit mindestens zwei fast gleichen Tiefs: seltener, aber deutlicher.",
+        "en": "With “equal highs and lows only” in the sweep, only places with at least two nearly equal lows count: rarer, but clearer."
+      },
+      {
+        "de": "„Rückkehr innerhalb“ 2 oder 3 Kerzen zählt auch Ausflüge, die kurz unter dem Tief schließen.",
+        "en": "“Return within” 2 or 3 candles also counts excursions that briefly close below the low."
+      },
+      {
+        "de": "Spiegelbildlich für Short: Sweep über Hochs, dann CHoCH nach unten.",
+        "en": "Mirrored for shorts: sweep above highs, then CHoCH down."
+      }
+    ],
+    "test": {
+      "alerts": 12,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "SOL/USDT", "timeframe": "1h" } },
+    { "id": "w1", "type": "core.sweeps", "position": { "x": 330, "y": 40 }, "settings": { "side": "lows", "pools": "all", "tolerance": 0.1, "bars": 1, "left": 10, "right": 10 } },
+    { "id": "s1", "type": "core.structure", "position": { "x": 330, "y": 300 }, "settings": { "left": 5, "right": 5, "trigger": "close" } },
+    { "id": "d1", "type": "core.sequence", "position": { "x": 630, "y": 170 }, "settings": { "bars": 24 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 900, "y": 170 }, "settings": { "cooldown": 6, "message": "▲ {{coin}}: Liquidität unter dem Tief geholt, dann Struktur nach oben gebrochen · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 540 },
+      "settings": { "text": "Ein klassisches Muster aus dem Smart-Money-Handel in zwei Schritten: Erst sticht der Kurs unter ein Swing-Tief (Swings 10 · 10) und schließt in derselben Kerze wieder darüber, die Stopps darunter sind abgeholt. „Danach“ wartet dann bis zu 24 Kerzen auf einen Wechsel des Charakters nach oben in der kleineren Struktur (Swings 5 · 5). Erst wenn beides in dieser Reihenfolge passiert, kommt der Alarm." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "w1.close" },
+    { "from": "c1.high", "to": "w1.high" },
+    { "from": "c1.low", "to": "w1.low" },
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "w1.sweep", "to": "d1.first" },
+    { "from": "s1.chochUp", "to": "d1.then" },
+    { "from": "d1.out", "to": "t1.in" }
+  ]
+}

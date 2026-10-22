@@ -1,0 +1,86 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Volatilitäts-Regime",
+  "version": 1,
+  "description": "Meldet, wenn die 30-Tage-Schwankung von BTC so hoch (▲) oder so niedrig (▼) ist wie an kaum einem Tag im letzten Jahr.",
+  "meta": {
+    "title": {
+      "de": "BTC Volatilitäts-Regime",
+      "en": "BTC Volatility Regime"
+    },
+    "description": {
+      "de": "Meldet, wenn die 30-Tage-Schwankung von BTC so hoch (▲) oder so niedrig (▼) ist wie an kaum einem Tag im letzten Jahr.",
+      "en": "Alerts when BTC’s 30-day volatility is as high (▲) or as low (▼) as on hardly any day in the past year."
+    },
+    "tags": [
+      "volatilitaet"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Phasen mit großer und kleiner Schwankung wechseln sich ab, und viele Regeln passen nur zu einer davon. Die Historische Volatilität misst die Schwankung der letzten 30 Tagesschlüsse, der Prozentrang vergleicht sie mit den 365 Tagen davor: über 90 ist sie höher als an 90 % dieser Tage, unter 10 niedriger als an 90 %. Bei BTC entsprach das in den letzten drei Jahren etwa 60 % und 30 % Schwankung. Weil der Rang jeden Coin nur mit sich selbst vergleicht, gilt die Regel für jeden Coin gleich. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren.",
+        "en": "Idea: phases of large and small swings alternate, and many rules only suit one of them. Historical volatility measures the swings of the last 30 daily closes, the percent rank compares them with the 365 days before: above 90 they are larger than on 90 % of those days, below 10 smaller than on 90 %. For BTC that matched about 60 % and 30 % volatility over the past three years. Because the rank only compares each coin with itself, the rule works the same for every coin. Enter your system’s https address in both webhook nodes; without it the chain cannot be activated."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Schwankung so hoch wie selten in 365 Tagen · {{werte}}",
+        "en": "▲ {{coin}}: volatility as high as rarely in 365 days · {{values}}"
+      },
+      "w1": {
+        "de": "▲ {{coin}}: Schwankung so hoch wie selten in 365 Tagen · {{werte}}",
+        "en": "▲ {{coin}}: volatility as high as rarely in 365 days · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: Schwankung so niedrig wie selten in 365 Tagen · {{werte}}",
+        "en": "▼ {{coin}}: volatility as low as rarely in 365 days · {{values}}"
+      },
+      "w2": {
+        "de": "▼ {{coin}}: Schwankung so niedrig wie selten in 365 Tagen · {{werte}}",
+        "en": "▼ {{coin}}: volatility as low as rarely in 365 days · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Feste Schwellen gehen auch: „Ruhig unter“ 30 und „Unruhig über“ 60 an der Historischen Volatilität, ohne Prozentrang.",
+        "en": "Fixed thresholds work too: “Calm below” 30 and “Volatile above” 60 on the historical volatility, without the percent rank."
+      },
+      {
+        "de": "Prozentrang 180 statt 365 vergleicht mit einem halben Jahr und erkennt neue Phasen früher.",
+        "en": "Percent rank 180 instead of 365 compares with half a year and spots new phases sooner."
+      },
+      {
+        "de": "Mit Trader prüft das Replay 365 Tage; so siehst du, wie oft das Regime in einem Jahr wechselt.",
+        "en": "With Trader the replay covers 365 days, so you see how often the regime changes in a year."
+      }
+    ],
+    "test": {
+      "alerts": 1,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1d" } },
+    { "id": "h1", "type": "core.hv", "position": { "x": 280, "y": 150 }, "settings": { "length": 30, "low": 30, "high": 60 } },
+    { "id": "p1", "type": "core.percent-rank", "position": { "x": 530, "y": 150 }, "settings": { "length": 365, "low": 10, "high": 90 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 20 }, "settings": { "cooldown": 168, "message": "▲ {{coin}}: Schwankung so hoch wie selten in 365 Tagen · {{werte}}" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 780, "y": 120 }, "settings": { "cooldown": 168, "message": "▲ {{coin}}: Schwankung so hoch wie selten in 365 Tagen · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 780, "y": 240 }, "settings": { "cooldown": 168, "message": "▼ {{coin}}: Schwankung so niedrig wie selten in 365 Tagen · {{werte}}" } },
+    { "id": "w2", "type": "core.webhook", "position": { "x": 780, "y": 340 }, "settings": { "cooldown": 168, "message": "▼ {{coin}}: Schwankung so niedrig wie selten in 365 Tagen · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 470 },
+      "settings": { "text": "Idee: Phasen mit großer und kleiner Schwankung wechseln sich ab, und viele Regeln passen nur zu einer davon. Die Historische Volatilität misst die Schwankung der letzten 30 Tagesschlüsse, der Prozentrang vergleicht sie mit den 365 Tagen davor: über 90 ist sie höher als an 90 % dieser Tage, unter 10 niedriger als an 90 %. Bei BTC entsprach das in den letzten drei Jahren etwa 60 % und 30 % Schwankung. Weil der Rang jeden Coin nur mit sich selbst vergleicht, gilt die Regel für jeden Coin gleich. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "h1.in" },
+    { "from": "h1.out", "to": "p1.in" },
+    { "from": "p1.high", "to": "t1.in" },
+    { "from": "p1.high", "to": "w1.in" },
+    { "from": "p1.low", "to": "t2.in" },
+    { "from": "p1.low", "to": "w2.in" }
+  ]
+}

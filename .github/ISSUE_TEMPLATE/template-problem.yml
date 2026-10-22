@@ -1,0 +1,18 @@
+name: Problem with a template · Problem mit einer Vorlage
+description: A template alerts wrongly, too often or not at all · Eine Vorlage meldet falsch, zu oft oder gar nicht
+labels: [bug]
+body:
+  - type: input
+    id: template
+    attributes:
+      label: Template · Vorlage
+      placeholder: e.g. templates/dip.json
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened? · Was ist passiert?
+      description: Pair, timeframe, time of the alert and what you expected · Paar, Zeiteinheit, Zeitpunkt des Alarms und was du erwartet hast
+    validations:
+      required: true

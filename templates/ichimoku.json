@@ -1,0 +1,74 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Ichimoku-Wolke",
+  "version": 1,
+  "description": "Der Kurs schließt zwei 4-Stunden-Kerzen über der Wolke (▲) oder darunter (▼).",
+  "meta": {
+    "title": {
+      "de": "BTC Ichimoku-Wolke",
+      "en": "BTC Ichimoku Cloud"
+    },
+    "description": {
+      "de": "Der Kurs schließt zwei 4-Stunden-Kerzen über der Wolke (▲) oder darunter (▼).",
+      "en": "The price closes two 4-hour candles above the cloud (▲) or below it (▼)."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Die Wolke trennt Aufwärts- und Abwärtstrend, in ihr ist der Markt unentschieden. Erst wenn zwei Kerzen nacheinander darüber oder darunter schließen, meldet die Chain den neuen Trend; „Bestätigung“ filtert kurze Ausflüge.",
+        "en": "Idea: the cloud separates uptrend and downtrend; inside it the market is undecided. Only when two candles in a row close above or below it does the chain report the new trend; “Confirmation” filters short excursions."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} über der Ichimoku-Wolke · {{werte}}",
+        "en": "▲ {{coin}} above the Ichimoku cloud · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}} unter der Ichimoku-Wolke · {{werte}}",
+        "en": "▼ {{coin}} below the Ichimoku cloud · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 1 statt 2 Kerzen in der Bestätigung kommt der Alarm früher.",
+        "en": "With 1 instead of 2 candles in the confirmation the alert comes earlier."
+      },
+      {
+        "de": "Für Kryptomärkte, die rund um die Uhr laufen, nutzen manche 20 · 60 · 120 statt 9 · 26 · 52.",
+        "en": "For crypto markets that run around the clock, some use 20 · 60 · 120 instead of 9 · 26 · 52."
+      }
+    ],
+    "test": {
+      "alerts": 21,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "4h" } },
+    { "id": "i1", "type": "core.ichimoku", "position": { "x": 280, "y": 60 }, "settings": { "conversion": 9, "base": 26, "spanB": 52, "displacement": 26 } },
+    { "id": "f1", "type": "core.confirm", "position": { "x": 530, "y": 40 }, "settings": { "bars": 2 } },
+    { "id": "f2", "type": "core.confirm", "position": { "x": 530, "y": 178 }, "settings": { "bars": 2 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{coin}} über der Ichimoku-Wolke · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 4, "message": "▼ {{coin}} unter der Ichimoku-Wolke · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Die Wolke trennt Aufwärts- und Abwärtstrend, in ihr ist der Markt unentschieden. Erst wenn zwei Kerzen nacheinander darüber oder darunter schließen, meldet die Chain den neuen Trend; „Bestätigung“ filtert kurze Ausflüge." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "i1.close" },
+    { "from": "c1.high", "to": "i1.high" },
+    { "from": "c1.low", "to": "i1.low" },
+    { "from": "i1.above", "to": "f1.in" },
+    { "from": "i1.below", "to": "f2.in" },
+    { "from": "f1.out", "to": "t1.in" },
+    { "from": "f2.out", "to": "t2.in" }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Erst Abverkauf, dann Erholung",
+  "version": 1,
+  "description": "Erst fällt der RSI unter 30, dann kreuzt der Kurs innerhalb von 12 Stunden den EMA 20 nach oben.",
+  "meta": {
+    "title": {
+      "de": "BTC Erst Abverkauf, dann Erholung",
+      "en": "BTC Sell-off, Then Recovery"
+    },
+    "description": {
+      "de": "Erst fällt der RSI unter 30, dann kreuzt der Kurs innerhalb von 12 Stunden den EMA 20 nach oben.",
+      "en": "First the RSI drops below 30, then within 12 hours the price crosses above the EMA 20."
+    },
+    "tags": [
+      "konfluenz",
+      "dip"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: nicht ins fallende Messer greifen. „Danach“ wartet auf die Reihenfolge: Erst muss der Abverkauf kommen, dann die Erholung über den EMA 20, und zwar innerhalb von 12 Kerzen.",
+        "en": "Idea: don’t catch a falling knife. “Then” waits for the order: first the sell-off, then the recovery above the EMA 20, within 12 candles."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} erholt sich nach RSI unter 30 · {{werte}}",
+        "en": "▲ {{coin}} recovers after RSI below 30 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 24 Kerzen darf die Erholung länger dauern.",
+        "en": "With 24 candles the recovery may take longer."
+      },
+      {
+        "de": "EMA 50 statt 20 verlangt eine deutlichere Erholung.",
+        "en": "An EMA 50 instead of 20 requires a clearer recovery."
+      }
+    ],
+    "test": {
+      "alerts": 11,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 40 }, "settings": { "length": 14 } },
+    { "id": "e1", "type": "core.ma", "position": { "x": 280, "y": 178 }, "settings": { "kind": "ema", "length": 20 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesBelow", "value": 30 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "d1", "type": "core.sequence", "position": { "x": 780, "y": 110 }, "settings": { "bars": 12 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 110 }, "settings": { "cooldown": 6, "message": "▲ {{coin}} erholt sich nach RSI unter 30 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: nicht ins fallende Messer greifen. „Danach“ wartet auf die Reihenfolge: Erst muss der Abverkauf kommen, dann die Erholung über den EMA 20, und zwar innerhalb von 12 Kerzen." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "e1.in" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "c1.close", "to": "k2.a" },
+    { "from": "e1.out", "to": "k2.b" },
+    { "from": "k1.out", "to": "d1.first" },
+    { "from": "k2.out", "to": "d1.then" },
+    { "from": "d1.out", "to": "t1.in" }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "SOL Rücklauf zum Ausbruch",
+  "version": 1,
+  "description": "Nach einem Ausbruch über das 20-Kerzen-Hoch kommt SOL innerhalb von 8 Stunden bis auf ±0,5 % an den Ausbruchskurs zurück.",
+  "meta": {
+    "title": {
+      "de": "SOL Rücklauf zum Ausbruch",
+      "en": "SOL Pullback to the Breakout"
+    },
+    "description": {
+      "de": "Nach einem Ausbruch über das 20-Kerzen-Hoch kommt SOL innerhalb von 8 Stunden bis auf ±0,5 % an den Ausbruchskurs zurück.",
+      "en": "After a breakout above the 20-candle high, SOL comes back within ±0.5 % of the breakout price within 8 hours."
+    },
+    "tags": [
+      "ausbruch",
+      "levels"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Nach einem Ausbruch kehrt der Kurs oft noch einmal zur Ausbruchsmarke zurück, bevor er weiterläuft oder scheitert. Wert bei Signal merkt sich den Schlusskurs beim Ausbruch über das Hoch der 20 Kerzen davor; „nahe“ meldet, wenn der Kurs danach bis auf ±0,5 % zurückkommt. Danach begrenzt das auf die ersten 8 Kerzen nach dem Ausbruch.",
+        "en": "Idea: after a breakout the price often returns to the breakout level once more before it moves on or fails. Value at signal remembers the close at the breakout above the high of the previous 20 candles; “near” reports when the price comes back within ±0.5 % afterwards. Then limits this to the first 8 candles after the breakout."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} zurück am Ausbruchskurs · {{werte}}",
+        "en": "▲ {{coin}} back at the breakout price · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit Band ±1 % zählen auch Rückläufe, die die Marke nicht ganz erreichen.",
+        "en": "With a band of ±1 % pullbacks that don’t quite reach the level count too."
+      },
+      {
+        "de": "Statt des Ausbruchs geht jedes Signal, etwa ein Kreuzen des EMA 200 oder ein Bruch der Struktur.",
+        "en": "Any signal works instead of the breakout, such as a cross of the EMA 200 or a break of structure."
+      }
+    ],
+    "test": {
+      "alerts": 33,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "SOL/USDT", "timeframe": "1h" } },
+    { "id": "h1", "type": "core.highlow", "position": { "x": 280, "y": 40 }, "settings": { "mode": "bars", "length": 20, "current": "exclude", "timezone": "Europe/Berlin" } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "v1", "type": "core.value-when", "position": { "x": 780, "y": 200 }, "settings": { "width": 0.5 } },
+    { "id": "s1", "type": "core.sequence", "position": { "x": 1030, "y": 120 }, "settings": { "bars": 8 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1280, "y": 120 }, "settings": { "cooldown": 24, "message": "▲ {{coin}} zurück am Ausbruchskurs · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Nach einem Ausbruch kehrt der Kurs oft noch einmal zur Ausbruchsmarke zurück, bevor er weiterläuft oder scheitert. Wert bei Signal merkt sich den Schlusskurs beim Ausbruch über das Hoch der 20 Kerzen davor; „nahe“ meldet, wenn der Kurs danach bis auf ±0,5 % zurückkommt. Danach begrenzt das auf die ersten 8 Kerzen nach dem Ausbruch." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.high", "to": "h1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "h1.high", "to": "k1.b" },
+    { "from": "c1.close", "to": "v1.in" },
+    { "from": "k1.out", "to": "v1.signal" },
+    { "from": "k1.out", "to": "s1.first" },
+    { "from": "v1.near", "to": "s1.then" },
+    { "from": "s1.out", "to": "t1.in" }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Parabolic SAR an dein System",
+  "version": 1,
+  "description": "Jede Wende des Parabolic SAR geht als Webhook an deine Adresse: ▲ nach oben, ▼ nach unten.",
+  "meta": {
+    "title": {
+      "de": "ETH Parabolic SAR an dein System",
+      "en": "ETH Parabolic SAR to Your System"
+    },
+    "description": {
+      "de": "Jede Wende des Parabolic SAR geht als Webhook an deine Adresse: ▲ nach oben, ▼ nach unten.",
+      "en": "Every Parabolic SAR flip goes to your address as a webhook: ▲ up, ▼ down."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Signale in eigene Systeme leiten, etwa n8n, Zapier, Home Assistant oder einen eigenen Bot. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren. Bellchain schickt nur die Nachricht und handelt nicht.",
+        "en": "Idea: route signals into your own systems such as n8n, Zapier, Home Assistant or your own bot. Enter your system’s https address in both webhook nodes; without it the chain cannot be activated. Bellchain only sends the message and does not trade."
+      }
+    },
+    "messages": {
+      "w1": {
+        "de": "▲ {{paar}}: Parabolic SAR aufwärts · {{kurs}}",
+        "en": "▲ {{pair}}: Parabolic SAR up · {{price}}"
+      },
+      "w2": {
+        "de": "▼ {{paar}}: Parabolic SAR abwärts · {{kurs}}",
+        "en": "▼ {{pair}}: Parabolic SAR down · {{price}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Im JSON nennt „action“ den Baustein, w1 oder w2; daran erkennt dein System die Richtung.",
+        "en": "In the JSON, “action” names the node, w1 or w2; that is how your system tells the direction."
+      },
+      {
+        "de": "Mit 1-Stunden-Kerzen kommen die Wenden öfter.",
+        "en": "With 1-hour candles the flips come more often."
+      }
+    ],
+    "test": {
+      "alerts": 39,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "4h" } },
+    { "id": "s1", "type": "core.psar", "position": { "x": 280, "y": 100 }, "settings": { "start": 0.02, "increment": 0.02, "max": 0.2 } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 530, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{paar}}: Parabolic SAR aufwärts · {{kurs}}" } },
+    { "id": "w2", "type": "core.webhook", "position": { "x": 530, "y": 178 }, "settings": { "cooldown": 4, "message": "▼ {{paar}}: Parabolic SAR abwärts · {{kurs}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Signale in eigene Systeme leiten, etwa n8n, Zapier, Home Assistant oder einen eigenen Bot. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren. Bellchain schickt nur die Nachricht und handelt nicht." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "s1.up", "to": "w1.in" },
+    { "from": "s1.down", "to": "w2.in" }
+  ]
+}

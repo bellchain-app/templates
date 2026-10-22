@@ -1,0 +1,86 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "XRP Überverkauft-Journal",
+  "version": 1,
+  "description": "Melden zwei von drei Oszillatoren „überverkauft“, schickt die Chain RSI, CCI und Williams %R an dein System.",
+  "meta": {
+    "title": {
+      "de": "XRP Überverkauft-Journal",
+      "en": "XRP Oversold Journal"
+    },
+    "description": {
+      "de": "Melden zwei von drei Oszillatoren „überverkauft“, schickt die Chain RSI, CCI und Williams %R an dein System.",
+      "en": "When two of three oscillators report “oversold”, the chain sends RSI, CCI and Williams %R to your system."
+    },
+    "tags": [
+      "konfluenz",
+      "momentum"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: ein eigenes Tagebuch für Signale, etwa in einer Tabelle. Die Nachrichtenvorlage packt die drei Werte in eine Zeile, die dein System leicht ausliest. Trag im Webhook-Baustein die https-Adresse deines Systems ein.",
+        "en": "Idea: your own signal journal, in a spreadsheet for example. The message template puts the three values into one line your system can easily parse. Enter your system’s https address in the webhook node."
+      }
+    },
+    "messages": {
+      "m1": {
+        "de": "{{paar}};{{zeit}};{{kurs}};RSI={{a}};CCI={{b}};WR={{c}}",
+        "en": "{{pair}};{{time}};{{price}};RSI={{a}};CCI={{b}};WR={{c}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit „Mindestens 3 von 3“ landen nur die klarsten Fälle im Journal.",
+        "en": "With “At least 3 of 3” only the clearest cases reach the journal."
+      },
+      {
+        "de": "Für überkauft: RSI über 75, CCI über 150, Williams %R über −10.",
+        "en": "For overbought: RSI above 75, CCI above 150, Williams %R above −10."
+      }
+    ],
+    "test": {
+      "alerts": 48,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 160 }, "settings": { "exchange": "binance", "pair": "XRP/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 40 }, "settings": { "length": 14 } },
+    { "id": "i1", "type": "core.cci", "position": { "x": 280, "y": 178 }, "settings": { "length": 20 } },
+    { "id": "w0", "type": "core.willr", "position": { "x": 280, "y": 332 }, "settings": { "length": 14 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 60 }, "settings": { "operator": "below", "value": 25 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 198 }, "settings": { "operator": "below", "value": -150 } },
+    { "id": "k3", "type": "core.compare", "position": { "x": 530, "y": 336 }, "settings": { "operator": "below", "value": -90 } },
+    { "id": "x1", "type": "core.atleast", "position": { "x": 780, "y": 80 }, "settings": { "count": 2 } },
+    { "id": "m1", "type": "core.message", "position": { "x": 780, "y": 262 }, "settings": { "text": "{{paar}};{{zeit}};{{kurs}};RSI={{a}};CCI={{b}};WR={{c}}" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 1030, "y": 190 }, "settings": { "cooldown": 4 } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 500 },
+      "settings": { "text": "Idee: ein eigenes Tagebuch für Signale, etwa in einer Tabelle. Die Nachrichtenvorlage packt die drei Werte in eine Zeile, die dein System leicht ausliest. Trag im Webhook-Baustein die https-Adresse deines Systems ein." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "i1.close" },
+    { "from": "c1.high", "to": "i1.high" },
+    { "from": "c1.low", "to": "i1.low" },
+    { "from": "c1.close", "to": "w0.close" },
+    { "from": "c1.high", "to": "w0.high" },
+    { "from": "c1.low", "to": "w0.low" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "i1.out", "to": "k2.in" },
+    { "from": "w0.out", "to": "k3.in" },
+    { "from": "k1.out", "to": "x1.in0" },
+    { "from": "k2.out", "to": "x1.in1" },
+    { "from": "k3.out", "to": "x1.in2" },
+    { "from": "r1.out", "to": "m1.a" },
+    { "from": "i1.out", "to": "m1.b" },
+    { "from": "w0.out", "to": "m1.c" },
+    { "from": "x1.out", "to": "w1.in" },
+    { "from": "m1.out", "to": "w1.message" }
+  ]
+}

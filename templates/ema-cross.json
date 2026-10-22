@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH EMA-Kreuzung 9/21",
+  "version": 1,
+  "description": "Der EMA 9 kreuzt den EMA 21 auf 4-Stunden-Kerzen: ▲ nach oben, ▼ nach unten.",
+  "meta": {
+    "title": {
+      "de": "ETH EMA-Kreuzung 9/21",
+      "en": "ETH EMA Cross 9/21"
+    },
+    "description": {
+      "de": "Der EMA 9 kreuzt den EMA 21 auf 4-Stunden-Kerzen: ▲ nach oben, ▼ nach unten.",
+      "en": "The EMA 9 crosses the EMA 21 on 4-hour candles: ▲ up, ▼ down."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Trendwechsel aus zwei Durchschnitten. Kreuzt der schnelle EMA 9 den langsamen EMA 21 nach oben, dreht der kurze Trend nach oben; nach unten ebenso. Zwei Telegram-Aktionen melden die Richtung mit ▲ und ▼.",
+        "en": "Idea: trend changes from two averages. When the fast EMA 9 crosses the slow EMA 21 upwards, the short trend turns up; the same downwards. Two Telegram actions report the direction with ▲ and ▼."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: EMA 9 kreuzt EMA 21 nach oben · {{werte}}",
+        "en": "▲ {{coin}}: EMA 9 crosses above EMA 21 · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: EMA 9 kreuzt EMA 21 nach unten · {{werte}}",
+        "en": "▼ {{coin}}: EMA 9 crosses below EMA 21 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "EMA 20 und 50 geben weniger, dafür längere Trends.",
+        "en": "EMA 20 and 50 give fewer but longer trends."
+      },
+      {
+        "de": "Brauchst du nur eine Richtung, lösch die andere Telegram-Aktion samt Vergleich.",
+        "en": "If you only need one direction, delete the other Telegram action and its compare."
+      }
+    ],
+    "test": {
+      "alerts": 38,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "4h" } },
+    { "id": "m1", "type": "core.ma", "position": { "x": 280, "y": 40 }, "settings": { "kind": "ema", "length": 9 } },
+    { "id": "m2", "type": "core.ma", "position": { "x": 280, "y": 178 }, "settings": { "kind": "ema", "length": 21 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: EMA 9 kreuzt EMA 21 nach oben · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: EMA 9 kreuzt EMA 21 nach unten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Trendwechsel aus zwei Durchschnitten. Kreuzt der schnelle EMA 9 den langsamen EMA 21 nach oben, dreht der kurze Trend nach oben; nach unten ebenso. Zwei Telegram-Aktionen melden die Richtung mit ▲ und ▼." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "m1.in" },
+    { "from": "c1.close", "to": "m2.in" },
+    { "from": "m1.out", "to": "k1.a" },
+    { "from": "m2.out", "to": "k1.b" },
+    { "from": "m1.out", "to": "k2.a" },
+    { "from": "m2.out", "to": "k2.b" },
+    { "from": "k1.out", "to": "t1.in" },
+    { "from": "k2.out", "to": "t2.in" }
+  ]
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "SOL Rücksetzer bis 61,8 %",
+  "version": 1,
+  "description": "Nach einem Anstieg fällt der Kurs bis zum Fibonacci-Level 61,8 %, dem Goldenen Schnitt.",
+  "meta": {
+    "title": {
+      "de": "SOL Rücksetzer bis 61,8 %",
+      "en": "SOL Pullback to 61.8 %"
+    },
+    "description": {
+      "de": "Nach einem Anstieg fällt der Kurs bis zum Fibonacci-Level 61,8 %, dem Goldenen Schnitt.",
+      "en": "After a rise the price falls back to the 61.8 % Fibonacci level, the golden ratio."
+    },
+    "tags": [
+      "levels",
+      "dip"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Bei Rücksetzern achten viele auf die Fibonacci-Level, besonders auf 61,8 %. Die Chain misst die letzte Bewegung von einem Swing-Tief zu einem Swing-Hoch und meldet, wenn der Kurs bis dorthin zurückfällt.",
+        "en": "Idea: during pullbacks many watch the Fibonacci levels, especially 61.8 %. The chain measures the last move from a swing low to a swing high and alerts when the price falls back that far."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "{{coin}} am Fibonacci-Level 61,8 % · {{werte}}",
+        "en": "{{coin}} at the 61.8 % Fibonacci level · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "50 % oder 38,2 % melden flachere Rücksetzer.",
+        "en": "50 % or 38.2 % report shallower pullbacks."
+      },
+      {
+        "de": "Mit 5 statt 10 Kerzen links und rechts zählen auch kleinere Swings.",
+        "en": "With 5 instead of 10 candles left and right, smaller swings count too."
+      }
+    ],
+    "test": {
+      "alerts": 26,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 80 }, "settings": { "exchange": "binance", "pair": "SOL/USDT", "timeframe": "1h" } },
+    { "id": "f1", "type": "core.fibonacci", "position": { "x": 280, "y": 40 }, "settings": { "left": 10, "right": 10 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 120 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 110 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 120 }, "settings": { "cooldown": 6, "message": "{{coin}} am Fibonacci-Level 61,8 % · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 340 },
+      "settings": { "text": "Idee: Bei Rücksetzern achten viele auf die Fibonacci-Level, besonders auf 61,8 %. Die Chain misst die letzte Bewegung von einem Swing-Tief zu einem Swing-Hoch und meldet, wenn der Kurs bis dorthin zurückfällt." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.high", "to": "f1.high" },
+    { "from": "c1.low", "to": "f1.low" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "f1.f618", "to": "k1.b" },
+    { "from": "f1.up", "to": "a1.in0" },
+    { "from": "k1.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

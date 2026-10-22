@@ -1,0 +1,89 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "Ausbrüche mit Volumen in 9 Coins",
+  "version": 1,
+  "description": "Einer der 9 Coins knackt sein 50er-Hoch mit mehr als dreifachem Volumen.",
+  "meta": {
+    "title": {
+      "de": "Ausbrüche mit Volumen in 9 Coins",
+      "en": "Volume Breakouts Across 9 Coins"
+    },
+    "description": {
+      "de": "Einer der 9 Coins knackt sein 50er-Hoch mit mehr als dreifachem Volumen.",
+      "en": "One of the 9 coins breaks its 50-candle high on more than three times the volume."
+    },
+    "tags": [
+      "scanner",
+      "ausbruch",
+      "volumen"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: die Vorlage „SOL Ausbruch mit Volumen“ für 9 Coins auf einmal. Der Kurs kreuzt das Hoch der letzten 50 Kerzen nach oben, und das Volumen dieser Kerze liegt über dem Dreifachen des Durchschnitts. Die Kerze läuft als Scanner; jeder Coin meldet sich einzeln, höchstens alle 12 Stunden.",
+        "en": "Idea: the “SOL Breakout with Volume” template for 9 coins at once. The price crosses above the high of the last 50 candles, and this candle’s volume is above three times the average. The candle runs as a scanner; each coin alerts on its own, at most every 12 hours."
+      }
+    },
+    "messages": {
+      "x1": {
+        "de": "▲ {{coin}}: Ausbruch über das 50er-Hoch mit Volumen · {{werte}}",
+        "en": "▲ {{coin}}: breakout above the 50-candle high with volume · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Faktor 2 statt 3 meldet auch Ausbrüche mit weniger Volumen.",
+        "en": "Factor 2 instead of 3 also reports breakouts with less volume."
+      },
+      {
+        "de": "Weitere Coins kommen in der Kerze unter „Mehrere Coins“ dazu; in Pro laufen bis zu 10.",
+        "en": "More coins go into the candle under “Several coins”; Pro runs up to 10."
+      }
+    ],
+    "test": {
+      "alerts": 71,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "scanner": {
+    "node": "c1",
+    "pairs": [
+      "BTC/USDT",
+      "ETH/USDT",
+      "SOL/USDT",
+      "XRP/USDT",
+      "BNB/USDT",
+      "DOGE/USDT",
+      "ADA/USDT",
+      "AVAX/USDT",
+      "LINK/USDT"
+    ]
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "h1", "type": "core.highlow", "position": { "x": 280, "y": 50 }, "settings": { "mode": "bars", "length": 50, "current": "exclude" } },
+    { "id": "v1", "type": "core.volume", "position": { "x": 280, "y": 290 }, "settings": { "length": 20 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 50 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 290 }, "settings": { "operator": "above", "factor": 3 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 170 }, "settings": {} },
+    { "id": "x1", "type": "core.telegram", "position": { "x": 1030, "y": 170 }, "settings": { "cooldown": 12, "message": "▲ {{coin}}: Ausbruch über das 50er-Hoch mit Volumen · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 450 },
+      "settings": { "text": "Idee: die Vorlage „SOL Ausbruch mit Volumen“ für 9 Coins auf einmal. Der Kurs kreuzt das Hoch der letzten 50 Kerzen nach oben, und das Volumen dieser Kerze liegt über dem Dreifachen des Durchschnitts. Die Kerze läuft als Scanner; jeder Coin meldet sich einzeln, höchstens alle 12 Stunden." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "h1.in" },
+    { "from": "c1.volume", "to": "v1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "h1.high", "to": "k1.b" },
+    { "from": "c1.volume", "to": "k2.a" },
+    { "from": "v1.average", "to": "k2.b" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "x1.in" }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "AVAX bricht die Struktur nach unten",
+  "version": 1,
+  "description": "Meldet den Bruch der Marktstruktur nach unten: BOS im Abwärtstrend, CHoCH, wenn ein Aufwärtstrend kippt.",
+  "meta": {
+    "title": {
+      "de": "AVAX bricht die Struktur nach unten",
+      "en": "AVAX Breaks Structure Downward"
+    },
+    "description": {
+      "de": "Meldet den Bruch der Marktstruktur nach unten: BOS im Abwärtstrend, CHoCH, wenn ein Aufwärtstrend kippt.",
+      "en": "Alerts on a downward break of market structure: BOS in a downtrend, CHoCH when an uptrend tips over."
+    },
+    "tags": [
+      "smartmoney",
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Das Spiegelbild von „BTC bricht die Struktur nach oben“: Die Marktstruktur liest den Trend aus Swings mit je 10 Kerzen davor und danach. Schließt eine Kerze unter dem letzten bestätigten Swing-Tief, ist die Struktur nach unten gebrochen: im Abwärtstrend ein BOS, nach einem Aufwärtstrend ein CHoCH. Gut als Warnung, wenn du den Coin hältst.",
+        "en": "The mirror image of “BTC Breaks Structure Upward”: market structure reads the trend from swings with 10 candles before and after. When a candle closes below the last confirmed swing low, structure has broken downward: in a downtrend a BOS, after an uptrend a CHoCH. Useful as a warning if you hold the coin."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▼ {{coin}}: Bruch der Struktur nach unten (BOS) · {{werte}}",
+        "en": "▼ {{coin}}: break of structure down (BOS) · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: Wechsel des Charakters, der Trend dreht nach unten (CHoCH) · {{werte}}",
+        "en": "▼ {{coin}}: change of character, the trend turns down (CHoCH) · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Nur die Wende zählt für dich: die Aktion für BOS löschen und CHoCH behalten.",
+        "en": "Only the turn matters to you: delete the BOS action and keep CHoCH."
+      },
+      {
+        "de": "„Bruch durch: Docht“ meldet schon, wenn das Tief einer Kerze unter dem Swing-Tief liegt, auch ohne Schluss darunter.",
+        "en": "“Break by: wick” already alerts when a candle’s low is below the swing low, even without a close below it."
+      },
+      {
+        "de": "Mit 5 Kerzen davor und danach siehst du die kleinere Struktur und bekommst etwa doppelt so viele Alarme.",
+        "en": "With 5 candles before and after you see the smaller structure and get about twice as many alerts."
+      }
+    ],
+    "test": {
+      "alerts": 27,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "AVAX/USDT", "timeframe": "1h" } },
+    { "id": "s1", "type": "core.structure", "position": { "x": 330, "y": 150 }, "settings": { "left": 10, "right": 10, "trigger": "close" } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 660, "y": 40 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: Bruch der Struktur nach unten (BOS) · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 660, "y": 260 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: Wechsel des Charakters, der Trend dreht nach unten (CHoCH) · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 440 },
+      "settings": { "text": "Das Spiegelbild von „BTC bricht die Struktur nach oben“: Die Marktstruktur liest den Trend aus Swings mit je 10 Kerzen davor und danach. Schließt eine Kerze unter dem letzten bestätigten Swing-Tief, ist die Struktur nach unten gebrochen: im Abwärtstrend ein BOS, nach einem Aufwärtstrend ein CHoCH. Gut als Warnung, wenn du den Coin hältst." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "s1.bosDown", "to": "t1.in" },
+    { "from": "s1.chochDown", "to": "t2.in" }
+  ]
+}

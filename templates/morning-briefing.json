@@ -1,0 +1,73 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC-Morgenbriefing für deine Community",
+  "version": 1,
+  "description": "Jeden Morgen um 8 Uhr Kurs, Veränderung über 24 Stunden und RSI an Discord und eine Telegram-Gruppe.",
+  "meta": {
+    "title": {
+      "de": "BTC-Morgenbriefing für deine Community",
+      "en": "BTC Morning Briefing for Your Community"
+    },
+    "description": {
+      "de": "Jeden Morgen um 8 Uhr Kurs, Veränderung über 24 Stunden und RSI an Discord und eine Telegram-Gruppe.",
+      "en": "Every morning at 8 AM: price, 24-hour change and RSI to Discord and a Telegram group."
+    },
+    "tags": [
+      "zeit"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: ein täglicher Beitrag für deine Community. Für Discord legst du in den Einstellungen des Kanals unter Integrationen einen Webhook an und kopierst seine Adresse in den Discord-Baustein. Im Telegram-Baustein trägst du unter „Chat“ die Chat-ID deiner Gruppe (/chatid in der Gruppe) oder den @Namen deines Kanals ein; leer geht der Beitrag an deinen Privatchat.",
+        "en": "Idea: a daily post for your community. For Discord, create a webhook under Integrations in the channel settings and copy its address into the Discord node. In the Telegram node, enter your group’s chat ID (/chatid in the group) or your channel’s @name under “Chat”; left empty, the post goes to your private chat."
+      }
+    },
+    "messages": {
+      "m1": {
+        "de": "Guten Morgen! {{paar}}: {{kurs}} · 24 Stunden: {{b}} % · RSI 14: {{c}}",
+        "en": "Good morning! {{pair}}: {{price}} · 24 hours: {{b}}% · RSI 14: {{c}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit „Mo–Fr“ im Zeitplan postet die Chain nur an Werktagen.",
+        "en": "With “Mon–Fri” in the schedule the chain posts on workdays only."
+      },
+      {
+        "de": "Brauchst du nur einen Weg, lösch den anderen Baustein.",
+        "en": "If you only need one channel, delete the other node."
+      }
+    ],
+    "test": {
+      "alerts": 90,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 140 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "z1", "type": "core.schedule", "position": { "x": 280, "y": 40 }, "settings": { "hour": 8, "minute": 0, "days": "daily", "timezone": "Europe/Berlin" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 178 }, "settings": { "length": 24 } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 316 }, "settings": { "length": 14 } },
+    { "id": "m1", "type": "core.message", "position": { "x": 530, "y": 160 }, "settings": { "text": "Guten Morgen! {{paar}}: {{kurs}} · 24 Stunden: {{b}} % · RSI 14: {{c}}" } },
+    { "id": "x1", "type": "core.discord", "position": { "x": 780, "y": 110 }, "settings": { "cooldown": 1 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 248 }, "settings": { "cooldown": 1 } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 460 },
+      "settings": { "text": "Idee: ein täglicher Beitrag für deine Community. Für Discord legst du in den Einstellungen des Kanals unter Integrationen einen Webhook an und kopierst seine Adresse in den Discord-Baustein. Im Telegram-Baustein trägst du unter „Chat“ die Chat-ID deiner Gruppe (/chatid in der Gruppe) oder den @Namen deines Kanals ein; leer geht der Beitrag an deinen Privatchat." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "m1.a" },
+    { "from": "g1.out", "to": "m1.b" },
+    { "from": "r1.out", "to": "m1.c" },
+    { "from": "z1.out", "to": "x1.in" },
+    { "from": "m1.out", "to": "x1.message" },
+    { "from": "z1.out", "to": "t1.in" },
+    { "from": "m1.out", "to": "t1.message" }
+  ]
+}

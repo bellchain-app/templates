@@ -1,0 +1,77 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BNB Unruhe-Melder",
+  "version": 1,
+  "description": "Starke Bewegung oder vierfaches Volumen: ein Push, dann 12 Stunden Cooldown für alle Signale.",
+  "meta": {
+    "title": {
+      "de": "BNB Unruhe-Melder",
+      "en": "BNB Turbulence Alert"
+    },
+    "description": {
+      "de": "Starke Bewegung oder vierfaches Volumen: ein Push, dann 12 Stunden Cooldown für alle Signale.",
+      "en": "A strong move or four times the volume: one push, then a 12-hour cooldown for all signals."
+    },
+    "tags": [
+      "volatilitaet",
+      "volumen"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: drei Signale, ein Alarm. ODER lässt jedes Signal durch, der Baustein Cooldown danach sperrt für 12 Stunden alle gemeinsam. Der Cooldown einer Aktion gilt dagegen nur für sie selbst.",
+        "en": "Idea: three signals, one alert. OR lets every signal through, the Cooldown node after it blocks all of them together for 12 hours. An action’s own cooldown, in contrast, only applies to that action."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "⚡ Unruhe bei {{coin}} · {{werte}}",
+        "en": "⚡ Turbulence in {{coin}} · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 24 Stunden im Cooldown kommt höchstens ein Alarm am Tag.",
+        "en": "With 24 hours in the cooldown at most one alert comes per day."
+      },
+      {
+        "de": "Weitere Signale hängst du an die freien Eingänge von ODER.",
+        "en": "Connect further signals to the free inputs of OR."
+      }
+    ],
+    "test": {
+      "alerts": 21,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 140 }, "settings": { "exchange": "binance", "pair": "BNB/USDT", "timeframe": "1h" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 260, "y": 100 }, "settings": { "length": 1 } },
+    { "id": "v1", "type": "core.volume", "position": { "x": 260, "y": 238 }, "settings": { "length": 20 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 490, "y": 40 }, "settings": { "operator": "above", "value": 2 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 490, "y": 178 }, "settings": { "operator": "below", "value": -2 } },
+    { "id": "k3", "type": "core.compare", "position": { "x": 490, "y": 316 }, "settings": { "operator": "above", "value": 4 } },
+    { "id": "o1", "type": "core.or", "position": { "x": 720, "y": 160 }, "settings": {} },
+    { "id": "d1", "type": "core.cooldown", "position": { "x": 950, "y": 180 }, "settings": { "hours": 12 } },
+    { "id": "p1", "type": "core.push", "position": { "x": 1180, "y": 180 }, "settings": { "cooldown": 0, "message": "⚡ Unruhe bei {{coin}} · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 460 },
+      "settings": { "text": "Idee: drei Signale, ein Alarm. ODER lässt jedes Signal durch, der Baustein Cooldown danach sperrt für 12 Stunden alle gemeinsam. Der Cooldown einer Aktion gilt dagegen nur für sie selbst." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "c1.volume", "to": "v1.in" },
+    { "from": "g1.out", "to": "k1.in" },
+    { "from": "g1.out", "to": "k2.in" },
+    { "from": "v1.relative", "to": "k3.in" },
+    { "from": "k1.out", "to": "o1.in0" },
+    { "from": "k2.out", "to": "o1.in1" },
+    { "from": "k3.out", "to": "o1.in2" },
+    { "from": "o1.out", "to": "d1.in" },
+    { "from": "d1.out", "to": "p1.in" }
+  ]
+}

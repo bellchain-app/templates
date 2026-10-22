@@ -1,0 +1,68 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "AVAX 14-Tage-Hoch und -Tief",
+  "version": 1,
+  "description": "Schließt AVAX so hoch oder so tief wie seit 14 Tagen nicht, postet die Chain höchstens einmal am Tag.",
+  "meta": {
+    "title": {
+      "de": "AVAX 14-Tage-Hoch und -Tief",
+      "en": "AVAX 14-Day High and Low"
+    },
+    "description": {
+      "de": "Schließt AVAX so hoch oder so tief wie seit 14 Tagen nicht, postet die Chain höchstens einmal am Tag.",
+      "en": "When AVAX closes higher or lower than at any time in 14 days, the chain posts at most once a day."
+    },
+    "tags": [
+      "ausbruch"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Neue Hochs und Tiefs sind Nachrichten, die eine Community interessieren. „Neues Hoch/Tief“ vergleicht den Schlusskurs mit den letzten 336 Kerzen, also 14 Tagen. Für Discord legst du in den Einstellungen des Kanals unter Integrationen einen Webhook an und kopierst seine Adresse in beide Discord-Bausteine.",
+        "en": "Idea: new highs and lows are news a community cares about. “New high/low” compares the close with the last 336 candles, that is 14 days. For Discord, create a webhook under Integrations in the channel settings and copy its address into both Discord nodes."
+      }
+    },
+    "messages": {
+      "x1": {
+        "de": "▲ {{coin}}: höchster Schluss seit 14 Tagen · {{kurs}}",
+        "en": "▲ {{coin}}: highest close in 14 days · {{price}}"
+      },
+      "x2": {
+        "de": "▼ {{coin}}: tiefster Schluss seit 14 Tagen · {{kurs}}",
+        "en": "▼ {{coin}}: lowest close in 14 days · {{price}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "720 Kerzen meinen 30 Tage.",
+        "en": "720 candles mean 30 days."
+      },
+      {
+        "de": "Der Cooldown von 24 Stunden je Aktion verhindert eine Serie von Beiträgen.",
+        "en": "The 24-hour cooldown per action prevents a series of posts."
+      }
+    ],
+    "test": {
+      "alerts": 15,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "AVAX/USDT", "timeframe": "1h" } },
+    { "id": "h1", "type": "core.newhighlow", "position": { "x": 280, "y": 110 }, "settings": { "length": 336 } },
+    { "id": "x1", "type": "core.discord", "position": { "x": 530, "y": 40 }, "settings": { "cooldown": 24, "message": "▲ {{coin}}: höchster Schluss seit 14 Tagen · {{kurs}}" } },
+    { "id": "x2", "type": "core.discord", "position": { "x": 530, "y": 178 }, "settings": { "cooldown": 24, "message": "▼ {{coin}}: tiefster Schluss seit 14 Tagen · {{kurs}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Neue Hochs und Tiefs sind Nachrichten, die eine Community interessieren. „Neues Hoch/Tief“ vergleicht den Schlusskurs mit den letzten 336 Kerzen, also 14 Tagen. Für Discord legst du in den Einstellungen des Kanals unter Integrationen einen Webhook an und kopierst seine Adresse in beide Discord-Bausteine." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "h1.in" },
+    { "from": "h1.high", "to": "x1.in" },
+    { "from": "h1.low", "to": "x2.in" }
+  ]
+}

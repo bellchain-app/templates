@@ -1,0 +1,70 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC über runde Marken",
+  "version": 1,
+  "description": "BTC schließt über (▲) oder unter (▼) einer runden Marke im Abstand von 10.000 $.",
+  "meta": {
+    "title": {
+      "de": "BTC über runde Marken",
+      "en": "BTC Crosses Round Numbers"
+    },
+    "description": {
+      "de": "BTC schließt über (▲) oder unter (▼) einer runden Marke im Abstand von 10.000 $.",
+      "en": "BTC closes above (▲) or below (▼) a round level every $10,000."
+    },
+    "tags": [
+      "levels"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: An runden Zahlen liegen viele Orders, deshalb reagiert der Kurs dort oft. Der Baustein Runde Zahlen kennt die Marken über und unter dem Kurs, hier alle 10.000 $, und meldet, wenn der Schluss eine davon kreuzt. Ein Cooldown von 2 Stunden hält Pendeln um eine Marke ruhig.",
+        "en": "Idea: many orders sit at round numbers, so the price often reacts there. The Round numbers node knows the levels above and below the price, here every $10,000, and reports when the close crosses one of them. A 2-hour cooldown keeps swings around a level quiet."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} über einer runden Marke: {{kurs}}",
+        "en": "▲ {{coin}} above a round number: {{price}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}} unter einer runden Marke: {{kurs}}",
+        "en": "▼ {{coin}} below a round number: {{price}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Stufe 0 wählt die Marken selbst: bei BTC alle 1.000 $, bei ETH alle 100 $.",
+        "en": "Step 0 picks the levels itself: every $1,000 for BTC, every $100 for ETH."
+      },
+      {
+        "de": "Mit „nahe“ und Band ±0,3 % meldet die Chain schon, wenn der Kurs einer Marke nahekommt.",
+        "en": "With “near” and a band of ±0.3 % the chain already reports when the price comes close to a level."
+      }
+    ],
+    "test": {
+      "alerts": 18,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.round-numbers", "position": { "x": 300, "y": 150 }, "settings": { "step": 10000, "level": "above", "width": 0.3 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 600, "y": 60 }, "settings": { "cooldown": 2, "message": "▲ {{coin}} über einer runden Marke: {{kurs}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 600, "y": 260 }, "settings": { "cooldown": 2, "message": "▼ {{coin}} unter einer runden Marke: {{kurs}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: An runden Zahlen liegen viele Orders, deshalb reagiert der Kurs dort oft. Der Baustein Runde Zahlen kennt die Marken über und unter dem Kurs, hier alle 10.000 $, und meldet, wenn der Schluss eine davon kreuzt. Ein Cooldown von 2 Stunden hält Pendeln um eine Marke ruhig." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.close" },
+    { "from": "c1.high", "to": "r1.high" },
+    { "from": "c1.low", "to": "r1.low" },
+    { "from": "r1.crossUp", "to": "t1.in" },
+    { "from": "r1.crossDown", "to": "t2.in" }
+  ]
+}

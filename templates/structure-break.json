@@ -1,0 +1,75 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC bricht die Struktur nach oben",
+  "version": 1,
+  "description": "Meldet den Bruch der Marktstruktur nach oben: BOS im Aufwärtstrend, CHoCH bei der Wende.",
+  "meta": {
+    "title": {
+      "de": "BTC bricht die Struktur nach oben",
+      "en": "BTC Breaks Structure Upward"
+    },
+    "description": {
+      "de": "Meldet den Bruch der Marktstruktur nach oben: BOS im Aufwärtstrend, CHoCH bei der Wende.",
+      "en": "Alerts on an upward break of market structure: BOS in an uptrend, CHoCH at the turn."
+    },
+    "tags": [
+      "smartmoney",
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Die Marktstruktur liest den Trend aus den Swings mit je 10 Kerzen davor und danach. Schließt eine Kerze über dem letzten bestätigten Swing-Hoch, ist die Struktur nach oben gebrochen: im Aufwärtstrend ein BOS (der Trend setzt sich fort), nach einem Abwärtstrend ein CHoCH (der Trend dreht). Ein frisches Hoch zählt erst, wenn die 10 Kerzen danach es bestätigt haben.",
+        "en": "Market structure reads the trend from the swings with 10 candles before and after. When a candle closes above the last confirmed swing high, structure has broken upward: in an uptrend that is a BOS (the trend continues), after a downtrend a CHoCH (the trend turns). A brand-new high only counts once the 10 candles after it have confirmed it."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Bruch der Struktur nach oben (BOS) · {{werte}}",
+        "en": "▲ {{coin}}: break of structure up (BOS) · {{values}}"
+      },
+      "t2": {
+        "de": "▲ {{coin}}: Wechsel des Charakters, der Trend dreht nach oben (CHoCH) · {{werte}}",
+        "en": "▲ {{coin}}: change of character, the trend turns up (CHoCH) · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Nur die Wende zählt für dich: Lösch die Aktion für BOS und behalte CHoCH.",
+        "en": "Only the turn matters to you: delete the BOS action and keep CHoCH."
+      },
+      {
+        "de": "Mit 5 Kerzen davor und danach siehst du die kleinere, innere Struktur und bekommst etwa doppelt so viele Alarme.",
+        "en": "With 5 candles before and after you see the smaller internal structure and get about twice as many alerts."
+      },
+      {
+        "de": "Für die Gegenrichtung BOS und CHoCH nach unten an eigene Aktionen hängen.",
+        "en": "For the other direction, connect BOS and CHoCH down to their own actions."
+      }
+    ],
+    "test": {
+      "alerts": 30,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "s1", "type": "core.structure", "position": { "x": 330, "y": 150 }, "settings": { "left": 10, "right": 10, "trigger": "close" } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 660, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: Bruch der Struktur nach oben (BOS) · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 660, "y": 260 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: Wechsel des Charakters, der Trend dreht nach oben (CHoCH) · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Die Marktstruktur liest den Trend aus den Swings mit je 10 Kerzen davor und danach. Schließt eine Kerze über dem letzten bestätigten Swing-Hoch, ist die Struktur nach oben gebrochen: im Aufwärtstrend ein BOS (der Trend setzt sich fort), nach einem Abwärtstrend ein CHoCH (der Trend dreht). Ein frisches Hoch zählt erst, wenn die 10 Kerzen danach es bestätigt haben." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "s1.bosUp", "to": "t1.in" },
+    { "from": "s1.chochUp", "to": "t2.in" }
+  ]
+}

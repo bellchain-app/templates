@@ -1,0 +1,89 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Wochenschluss über 124.824 $",
+  "version": 1,
+  "description": "Wochenschluss von BTC über 124.824 $ an Telegram und Webhook, dazu Wochenschlüsse über und unter runden 10.000ern.",
+  "meta": {
+    "title": {
+      "de": "BTC Wochenschluss über 124.824 $",
+      "en": "BTC Weekly Close Above $124,824"
+    },
+    "description": {
+      "de": "Wochenschluss von BTC über 124.824 $ an Telegram und Webhook, dazu Wochenschlüsse über und unter runden 10.000ern.",
+      "en": "A BTC weekly close above $124,824 to Telegram and webhook, plus weekly closes above and below round 10,000s."
+    },
+    "tags": [
+      "levels",
+      "ausbruch"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Ein Wochenschluss über einer Marke wiegt mehr als ein kurzer Ausflug darüber, weil er eine ganze Woche zusammenfasst. Hier ist die Marke 124.824 $, nahe dem bisher höchsten Tagesschluss von BTC; sie geht an Telegram und an den Webhook. Dazu meldet Runde Zahlen jeden Wochenschluss über oder unter einer Marke im Abstand von 10.000 $, etwa 90.000 $ oder 100.000 $, nur an Telegram. Die Woche schließt Sonntag um 24:00 UTC. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren.",
+        "en": "Idea: a weekly close above a level weighs more than a brief move above it because it sums up a whole week. Here the level is $124,824, near BTC’s highest daily close so far; it goes to Telegram and to the webhook. On top, Round numbers reports every weekly close above or below a level spaced $10,000 apart, such as $90,000 or $100,000, to Telegram only. The week closes on Sunday at 24:00 UTC. Enter your system’s https address in the webhook node; without it the chain cannot be activated."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Wochenschluss über 124.824 $ · {{kurs}}",
+        "en": "▲ {{coin}}: weekly close above $124,824 · {{price}}"
+      },
+      "w1": {
+        "de": "▲ {{coin}}: Wochenschluss über 124.824 $ · {{kurs}}",
+        "en": "▲ {{coin}}: weekly close above $124,824 · {{price}}"
+      },
+      "t2": {
+        "de": "▲ {{coin}}: Wochenschluss über einer runden Marke · {{werte}}",
+        "en": "▲ {{coin}}: weekly close above a round number · {{values}}"
+      },
+      "t3": {
+        "de": "▼ {{coin}}: Wochenschluss unter einer runden Marke · {{werte}}",
+        "en": "▼ {{coin}}: weekly close below a round number · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Die Marke stellst du im Vergleich ein; „kreuzt nach unten“ meldet einen Wochenschluss darunter.",
+        "en": "You set the level in the comparison; “crosses below” reports a weekly close below it."
+      },
+      {
+        "de": "Stufe 5.000 statt 10.000 meldet auch Marken wie 95.000 $ und 105.000 $.",
+        "en": "Step 5,000 instead of 10,000 also reports levels such as $95,000 and $105,000."
+      },
+      {
+        "de": "In einen eigenen Telegram-Kanal postet die Chain mit einer Chat-ID am Telegram-Baustein; das gibt es mit Community.",
+        "en": "The chain posts to your own Telegram channel with a chat ID on the Telegram node; that comes with Community."
+      }
+    ],
+    "test": {
+      "alerts": 4,
+      "days": 90,
+      "until": "2026-10-12"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1w" } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 280, "y": 20 }, "settings": { "operator": "crossesAbove", "value": 124824 } },
+    { "id": "r1", "type": "core.round-numbers", "position": { "x": 280, "y": 200 }, "settings": { "step": 10000, "level": "above", "width": 0.3 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 530, "y": 0 }, "settings": { "cooldown": 168, "message": "▲ {{coin}}: Wochenschluss über 124.824 $ · {{kurs}}" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 530, "y": 100 }, "settings": { "cooldown": 168, "message": "▲ {{coin}}: Wochenschluss über 124.824 $ · {{kurs}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 530, "y": 230 }, "settings": { "cooldown": 168, "message": "▲ {{coin}}: Wochenschluss über einer runden Marke · {{werte}}" } },
+    { "id": "t3", "type": "core.telegram", "position": { "x": 530, "y": 340 }, "settings": { "cooldown": 168, "message": "▼ {{coin}}: Wochenschluss unter einer runden Marke · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 470 },
+      "settings": { "text": "Idee: Ein Wochenschluss über einer Marke wiegt mehr als ein kurzer Ausflug darüber, weil er eine ganze Woche zusammenfasst. Hier ist die Marke 124.824 $, nahe dem bisher höchsten Tagesschluss von BTC; sie geht an Telegram und an den Webhook. Dazu meldet Runde Zahlen jeden Wochenschluss über oder unter einer Marke im Abstand von 10.000 $, etwa 90.000 $ oder 100.000 $, nur an Telegram. Die Woche schließt Sonntag um 24:00 UTC. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "k1.in" },
+    { "from": "c1.close", "to": "r1.close" },
+    { "from": "c1.high", "to": "r1.high" },
+    { "from": "c1.low", "to": "r1.low" },
+    { "from": "k1.out", "to": "t1.in" },
+    { "from": "k1.out", "to": "w1.in" },
+    { "from": "r1.crossUp", "to": "t2.in" },
+    { "from": "r1.crossDown", "to": "t3.in" }
+  ]
+}

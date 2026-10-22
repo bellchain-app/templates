@@ -1,0 +1,71 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BNB Lücke zur Hälfte gefüllt",
+  "version": 1,
+  "description": "Der Kurs füllt eine Aufwärtslücke ab 0,5 % bis zur Hälfte, die Mitte, auf die viele Trader achten.",
+  "meta": {
+    "title": {
+      "de": "BNB Lücke zur Hälfte gefüllt",
+      "en": "BNB Gap Half Filled"
+    },
+    "description": {
+      "de": "Der Kurs füllt eine Aufwärtslücke ab 0,5 % bis zur Hälfte, die Mitte, auf die viele Trader achten.",
+      "en": "The price fills an up gap of 0.5 % or more halfway, the middle many traders watch."
+    },
+    "tags": [
+      "smartmoney",
+      "dip"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Der Baustein Fair Value Gaps gibt mit „gefüllt %“ an, wie tief der Kurs in die nächste offene Aufwärtslücke (ab 0,5 %) gelaufen ist. Der Vergleich meldet, wenn das über 50 % steigt: Der Kurs hat die Mitte der Lücke erreicht, im Smart-Money-Handel „Consequent Encroachment“ genannt.",
+        "en": "The fair value gaps node reports with “Filled %” how deep the price has moved into the nearest open up gap (0.5 % or more). The compare alerts when that rises above 50 %: the price has reached the middle of the gap, called “consequent encroachment” in smart money trading."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "{{coin}} hat eine Aufwärtslücke zur Hälfte gefüllt · {{werte}}",
+        "en": "{{coin}} has filled an up gap halfway · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 100 statt 50 meldet die Chain, wenn die Lücke ganz gefüllt ist; dafür gibt es auch den Ausgang „Lücke gefüllt“.",
+        "en": "With 100 instead of 50 the chain alerts when the gap is completely filled; the output “Gap filled” does that too."
+      },
+      {
+        "de": "Nur im Aufwärtstrend: „Trend aufwärts“ einer Marktstruktur und den Vergleich an UND.",
+        "en": "Only in an uptrend: “Uptrend” of a market structure and the compare into AND."
+      },
+      {
+        "de": "Für Abwärtslücken die Richtung umstellen: Dann meldet die Chain, wenn der Kurs eine Lücke über ihm zur Hälfte füllt.",
+        "en": "For down gaps, switch the direction: then the chain alerts when the price fills a gap above it halfway."
+      }
+    ],
+    "test": {
+      "alerts": 12,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BNB/USDT", "timeframe": "1h" } },
+    { "id": "f1", "type": "core.fvg", "position": { "x": 330, "y": 150 }, "settings": { "side": "up", "minSize": 0.5 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 630, "y": 150 }, "settings": { "operator": "crossesAbove", "value": 50 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 900, "y": 150 }, "settings": { "cooldown": 4, "message": "{{coin}} hat eine Aufwärtslücke zur Hälfte gefüllt · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 440 },
+      "settings": { "text": "Der Baustein Fair Value Gaps gibt mit „gefüllt %“ an, wie tief der Kurs in die nächste offene Aufwärtslücke (ab 0,5 %) gelaufen ist. Der Vergleich meldet, wenn das über 50 % steigt: Der Kurs hat die Mitte der Lücke erreicht, im Smart-Money-Handel „Consequent Encroachment“ genannt." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "f1.close" },
+    { "from": "c1.high", "to": "f1.high" },
+    { "from": "c1.low", "to": "f1.low" },
+    { "from": "f1.fill", "to": "k1.in" },
+    { "from": "k1.out", "to": "t1.in" }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Crash-Wecker",
+  "version": 1,
+  "description": "Minus 3,5 % in vier Stunden. 12 Stunden Cooldown, damit nachts nur ein Alarm kommt.",
+  "meta": {
+    "title": {
+      "de": "ETH Crash-Wecker",
+      "en": "ETH Crash Alarm"
+    },
+    "description": {
+      "de": "Minus 3,5 % in vier Stunden. 12 Stunden Cooldown, damit nachts nur ein Alarm kommt.",
+      "en": "Minus 3.5 % in four hours. A 12-hour cooldown so that only one alert comes at night."
+    },
+    "tags": [
+      "einsteiger",
+      "crash"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Meldet sich per Push und Telegram, wenn ETH in vier Stunden mehr als 3,5 % verliert. Danach hat jede Aktion 12 Stunden Cooldown, damit nachts nur ein Alarm kommt.",
+        "en": "Alerts via push and Telegram when ETH loses more than 3.5 % in four hours. Then each action has a 12-hour cooldown so that only one alert comes at night."
+      }
+    },
+    "messages": {
+      "s1": {
+        "de": "▼ {{coin}} fällt in 4 Stunden um mehr als 3,5 % · {{werte}}",
+        "en": "▼ {{coin}} drops more than 3.5 % in 4 hours · {{values}}"
+      },
+      "q1": {
+        "de": "▼ {{coin}} fällt in 4 Stunden um mehr als 3,5 % · {{werte}}",
+        "en": "▼ {{coin}} drops more than 3.5 % in 4 hours · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "−5 % statt −3,5 % meldet nur echte Einbrüche.",
+        "en": "−5 % instead of −3.5 % reports only real crashes."
+      },
+      {
+        "de": "24 Kerzen in Veränderung % messen einen ganzen Tag.",
+        "en": "24 candles in Change % measure a whole day."
+      },
+      {
+        "de": "Für starke Anstiege einen zweiten Vergleich „über 3,5“ mit eigener Aktion anlegen.",
+        "en": "For strong rises, add a second compare “above 3.5” with its own action."
+      }
+    ],
+    "test": {
+      "alerts": 3,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "1h" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 110 }, "settings": { "length": 4 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 110 }, "settings": { "operator": "below", "value": -3.5 } },
+    { "id": "s1", "type": "core.push", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 12, "message": "▼ {{coin}} fällt in 4 Stunden um mehr als 3,5 % · {{werte}}" } },
+    { "id": "q1", "type": "core.telegram", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 12, "message": "▼ {{coin}} fällt in 4 Stunden um mehr als 3,5 % · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 280, "y": 330 },
+      "settings": { "text": "Meldet sich per Push und Telegram, wenn ETH in vier Stunden mehr als 3,5 % verliert. Danach hat jede Aktion 12 Stunden Cooldown, damit nachts nur ein Alarm kommt." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "g1.out", "to": "k1.in" },
+    { "from": "k1.out", "to": "s1.in" },
+    { "from": "k1.out", "to": "q1.in" }
+  ]
+}

@@ -1,0 +1,79 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "RSI-Scanner über 9 Coins",
+  "version": 1,
+  "description": "Meldet jeden der 9 Coins, sobald sein RSI unter 25 fällt, höchstens alle 12 Stunden je Coin.",
+  "meta": {
+    "title": {
+      "de": "RSI-Scanner über 9 Coins",
+      "en": "RSI Scanner Across 9 Coins"
+    },
+    "description": {
+      "de": "Meldet jeden der 9 Coins, sobald sein RSI unter 25 fällt, höchstens alle 12 Stunden je Coin.",
+      "en": "Reports each of the 9 coins as soon as its RSI drops below 25, at most every 12 hours per coin."
+    },
+    "tags": [
+      "scanner",
+      "momentum"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: eine Chain für viele Coins. Die Kerze läuft als Scanner über 9 gängige Coins; jeder rechnet seinen eigenen RSI und meldet sich einzeln, höchstens alle 12 Stunden. Fallen mehrere Coins zur selben Stunde unter 25, kommt eine Nachricht mit allen. Coins änderst du in der Kerze unter „Mehrere Coins“.",
+        "en": "Idea: one chain for many coins. The candle runs as a scanner over 9 common coins; each computes its own RSI and alerts on its own, at most every 12 hours. If several coins drop below 25 in the same hour, one message lists them all. You change the coins in the candle under “Several coins”."
+      }
+    },
+    "messages": {
+      "x1": {
+        "de": "{{coin}}: RSI unter 25 · {{werte}}",
+        "en": "{{coin}}: RSI below 25 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 30 statt 25 meldet der Scanner gut doppelt so oft, auch bei leichteren Rücksetzern.",
+        "en": "With 30 instead of 25 the scanner alerts more than twice as often, also on milder pullbacks."
+      },
+      {
+        "de": "Im Replay wählst du neben der Zahl der Alarme, welchen Coin Chart und Liste zeigen; die Auswahl nennt auch die Alarme jedes Coins.",
+        "en": "In the replay you choose next to the number of alerts which coin the chart and list show; the selection also lists the alerts of each coin."
+      }
+    ],
+    "test": {
+      "alerts": 82,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "scanner": {
+    "node": "c1",
+    "pairs": [
+      "BTC/USDT",
+      "ETH/USDT",
+      "SOL/USDT",
+      "XRP/USDT",
+      "BNB/USDT",
+      "DOGE/USDT",
+      "ADA/USDT",
+      "AVAX/USDT",
+      "LINK/USDT"
+    ]
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 60 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 60 }, "settings": { "length": 14 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 60 }, "settings": { "operator": "below", "value": 25 } },
+    { "id": "x1", "type": "core.telegram", "position": { "x": 780, "y": 60 }, "settings": { "cooldown": 12, "message": "{{coin}}: RSI unter 25 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 260 },
+      "settings": { "text": "Idee: eine Chain für viele Coins. Die Kerze läuft als Scanner über 9 gängige Coins; jeder rechnet seinen eigenen RSI und meldet sich einzeln, höchstens alle 12 Stunden. Fallen mehrere Coins zur selben Stunde unter 25, kommt eine Nachricht mit allen. Coins änderst du in der Kerze unter „Mehrere Coins“." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "k1.out", "to": "x1.in" }
+  ]
+}

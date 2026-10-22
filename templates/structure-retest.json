@@ -1,0 +1,75 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Retest nach dem Bruch",
+  "version": 1,
+  "description": "Nach einem Bruch der Struktur nach oben kommt der Kurs zum gebrochenen Level zurück, bis auf ±0,3 %.",
+  "meta": {
+    "title": {
+      "de": "BTC Retest nach dem Bruch",
+      "en": "BTC Retest After the Break"
+    },
+    "description": {
+      "de": "Nach einem Bruch der Struktur nach oben kommt der Kurs zum gebrochenen Level zurück, bis auf ±0,3 %.",
+      "en": "After an upward break of structure, the price comes back to the broken level, within ±0.3 %."
+    },
+    "tags": [
+      "smartmoney",
+      "levels"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Nach einem Bruch nach oben (Marktstruktur, Swings 10 · 10) kehrt der Kurs oft zum gebrochenen Swing-Hoch zurück, bevor er weiterläuft: der Retest. Das Band legt ±0,3 % um das Level des letzten Bruchs und meldet, wenn der Kurs hineinläuft, solange der Trend aufwärts zeigt. Auf 4-Stunden-Kerzen zählen nur die größeren Brüche.",
+        "en": "After a break upward (market structure, swings 10 · 10) the price often returns to the broken swing high before it moves on: the retest. The band puts ±0.3 % around the level of the last break and alerts when the price enters it, as long as the trend points up. On 4-hour candles only the larger breaks count."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} testet das gebrochene Level von oben · {{werte}}",
+        "en": "▲ {{coin}} retests the broken level from above · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit ±0,5 % im Band zählen auch Retests, die das Level nicht ganz erreichen.",
+        "en": "With ±0.5 % in the band, retests that don’t quite reach the level count too."
+      },
+      {
+        "de": "Für die Gegenrichtung „Trend abwärts“ statt „Trend aufwärts“: Dann testet der Kurs das gebrochene Tief von unten.",
+        "en": "For the other direction, “Downtrend” instead of “Uptrend”: then the price retests the broken low from below."
+      },
+      {
+        "de": "Auf 1-Stunden-Kerzen kommen etwa dreimal so viele Alarme; ein Cooldown von 12 Stunden hält sie ruhiger.",
+        "en": "On 1-hour candles about three times as many alerts come; a cooldown of 12 hours keeps them calmer."
+      }
+    ],
+    "test": {
+      "alerts": 17,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "4h" } },
+    { "id": "s1", "type": "core.structure", "position": { "x": 330, "y": 40 }, "settings": { "left": 10, "right": 10, "trigger": "close" } },
+    { "id": "b1", "type": "core.band", "position": { "x": 630, "y": 330 }, "settings": { "mode": "enters", "width": 0.3, "bars": 12, "crossings": 3 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 900, "y": 170 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1170, "y": 170 }, "settings": { "cooldown": 6, "message": "▲ {{coin}} testet das gebrochene Level von oben · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 580 },
+      "settings": { "text": "Nach einem Bruch nach oben (Marktstruktur, Swings 10 · 10) kehrt der Kurs oft zum gebrochenen Swing-Hoch zurück, bevor er weiterläuft: der Retest. Das Band legt ±0,3 % um das Level des letzten Bruchs und meldet, wenn der Kurs hineinläuft, solange der Trend aufwärts zeigt. Auf 4-Stunden-Kerzen zählen nur die größeren Brüche." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "c1.close", "to": "b1.in" },
+    { "from": "s1.level", "to": "b1.line" },
+    { "from": "s1.bullish", "to": "a1.in0" },
+    { "from": "b1.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

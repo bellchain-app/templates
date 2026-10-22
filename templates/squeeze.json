@@ -1,0 +1,80 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Squeeze löst sich",
+  "version": 1,
+  "description": "Nach einer ruhigen Phase löst sich der Squeeze: ▲ mit Momentum nach oben, ▼ nach unten.",
+  "meta": {
+    "title": {
+      "de": "ETH Squeeze löst sich",
+      "en": "ETH Squeeze Release"
+    },
+    "description": {
+      "de": "Nach einer ruhigen Phase löst sich der Squeeze: ▲ mit Momentum nach oben, ▼ nach unten.",
+      "en": "After a quiet phase the squeeze releases: ▲ with momentum up, ▼ down."
+    },
+    "tags": [
+      "volatilitaet"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Ruhe vor dem Sturm. Ziehen sich die Bollinger-Bänder in den Keltner-Kanal zusammen, läuft der Kurs ungewöhnlich ruhig. Endet diese Phase, folgt oft eine kräftige Bewegung; das Momentum zeigt ihre Richtung.",
+        "en": "Idea: the calm before the storm. When the Bollinger Bands contract inside the Keltner Channel, the price runs unusually calmly. When this phase ends, a strong move often follows; the momentum shows its direction."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Squeeze löst sich nach oben · {{werte}}",
+        "en": "▲ {{coin}}: squeeze releases upwards · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: Squeeze löst sich nach unten · {{werte}}",
+        "en": "▼ {{coin}}: squeeze releases downwards · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Keltner-Faktor 2 statt 1,5 erkennt mehr Ruhephasen.",
+        "en": "A Keltner factor of 2 instead of 1.5 detects more quiet phases."
+      },
+      {
+        "de": "Mit 1-Stunden-Kerzen gibt es mehr, aber kleinere Ausbrüche.",
+        "en": "With 1-hour candles there are more but smaller breakouts."
+      }
+    ],
+    "test": {
+      "alerts": 16,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 90 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "4h" } },
+    { "id": "q1", "type": "core.squeeze", "position": { "x": 280, "y": 120 }, "settings": { "length": 20, "bbMult": 2, "kcMult": 1.5 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 60 }, "settings": { "operator": "above", "value": 0 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 198 }, "settings": { "operator": "below", "value": 0 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 40 }, "settings": {} },
+    { "id": "a2", "type": "core.and", "position": { "x": 780, "y": 194 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 60 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: Squeeze löst sich nach oben · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 1030, "y": 198 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: Squeeze löst sich nach unten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 360 },
+      "settings": { "text": "Idee: Ruhe vor dem Sturm. Ziehen sich die Bollinger-Bänder in den Keltner-Kanal zusammen, läuft der Kurs ungewöhnlich ruhig. Endet diese Phase, folgt oft eine kräftige Bewegung; das Momentum zeigt ihre Richtung." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "q1.close" },
+    { "from": "c1.high", "to": "q1.high" },
+    { "from": "c1.low", "to": "q1.low" },
+    { "from": "q1.momentum", "to": "k1.in" },
+    { "from": "q1.momentum", "to": "k2.in" },
+    { "from": "q1.fired", "to": "a1.in0" },
+    { "from": "k1.out", "to": "a1.in1" },
+    { "from": "q1.fired", "to": "a2.in0" },
+    { "from": "k2.out", "to": "a2.in1" },
+    { "from": "a1.out", "to": "t1.in" },
+    { "from": "a2.out", "to": "t2.in" }
+  ]
+}

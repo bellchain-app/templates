@@ -1,0 +1,77 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Wochen-Pivots",
+  "version": 1,
+  "description": "Der Kurs bricht über den Widerstand R1 (▲) oder unter die Unterstützung S1 (▼) der Woche.",
+  "meta": {
+    "title": {
+      "de": "ETH Wochen-Pivots",
+      "en": "ETH Weekly Pivots"
+    },
+    "description": {
+      "de": "Der Kurs bricht über den Widerstand R1 (▲) oder unter die Unterstützung S1 (▼) der Woche.",
+      "en": "The price breaks above the weekly resistance R1 (▲) or below the weekly support S1 (▼)."
+    },
+    "tags": [
+      "levels"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Pivot-Punkte rechnen aus Hoch, Tief und Schluss der Vorwoche Marken für die neue Woche. R1 und S1 sind der erste Widerstand und die erste Unterstützung; ein Bruch zeigt oft, wohin die Woche läuft.",
+        "en": "Idea: pivot points calculate levels for the new week from the previous week’s high, low and close. R1 and S1 are the first resistance and the first support; a break often shows where the week is heading."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} über R1 der Woche · {{werte}}",
+        "en": "▲ {{coin}} above weekly R1 · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}} unter S1 der Woche · {{werte}}",
+        "en": "▼ {{coin}} below weekly S1 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit Zeitraum „Tag“ gelten die Marken nur bis Mitternacht (UTC), und es gibt mehr Alarme.",
+        "en": "With period “day” the levels only last until midnight (UTC), and there are more alerts."
+      },
+      {
+        "de": "R2 und S2 melden nur größere Ausbrüche.",
+        "en": "R2 and S2 report only bigger breakouts."
+      }
+    ],
+    "test": {
+      "alerts": 14,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "1h" } },
+    { "id": "v1", "type": "core.pivots", "position": { "x": 280, "y": 50 }, "settings": { "kind": "classic", "period": "week", "timezone": "UTC" } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 12, "message": "▲ {{coin}} über R1 der Woche · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 12, "message": "▼ {{coin}} unter S1 der Woche · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Pivot-Punkte rechnen aus Hoch, Tief und Schluss der Vorwoche Marken für die neue Woche. R1 und S1 sind der erste Widerstand und die erste Unterstützung; ein Bruch zeigt oft, wohin die Woche läuft." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "v1.close" },
+    { "from": "c1.open", "to": "v1.open" },
+    { "from": "c1.high", "to": "v1.high" },
+    { "from": "c1.low", "to": "v1.low" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "v1.r1", "to": "k1.b" },
+    { "from": "c1.close", "to": "k2.a" },
+    { "from": "v1.s1", "to": "k2.b" },
+    { "from": "k1.out", "to": "t1.in" },
+    { "from": "k2.out", "to": "t2.in" }
+  ]
+}

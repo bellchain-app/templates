@@ -1,0 +1,81 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "Bullische RSI-Divergenz auf Tageskerzen",
+  "version": 1,
+  "description": "Meldet für BTC, ETH und SOL, wenn der Kurs auf Tageskerzen ein tieferes Tief macht, der RSI aber ein höheres.",
+  "meta": {
+    "title": {
+      "de": "Bullische RSI-Divergenz auf Tageskerzen",
+      "en": "Bullish RSI Divergence on Daily Candles"
+    },
+    "description": {
+      "de": "Meldet für BTC, ETH und SOL, wenn der Kurs auf Tageskerzen ein tieferes Tief macht, der RSI aber ein höheres.",
+      "en": "Reports for BTC, ETH and SOL when the price makes a lower low on daily candles but the RSI makes a higher one."
+    },
+    "tags": [
+      "momentum",
+      "scanner"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Fällt der Kurs auf ein tieferes Tief, der RSI aber nicht, verliert der Abverkauf an Schwung. Auf Tageskerzen ist das selten; viele lesen es als Bestätigung zu anderen Signalen, nicht als Signal für sich. Die Divergenz steht fest, wenn das zweite Tief 3 Tage alt ist, und meldet sich dann, nie rückwirkend. Die Kerze läuft als Scanner über BTC, ETH und SOL, jeder Coin meldet sich einzeln. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren.",
+        "en": "Idea: when the price falls to a lower low but the RSI does not, the sell-off is losing momentum. On daily candles this is rare; many read it as confirmation of other signals rather than as a signal on its own. The divergence is confirmed once the second low is 3 days old and reports then, never in hindsight. The candle runs as a scanner over BTC, ETH and SOL; each coin alerts on its own. Enter your system’s https address in the webhook node; without it the chain cannot be activated."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: bullische RSI-Divergenz auf Tageskerzen · {{werte}}",
+        "en": "▲ {{coin}}: bullish RSI divergence on daily candles · {{values}}"
+      },
+      "w1": {
+        "de": "▲ {{coin}}: bullische RSI-Divergenz auf Tageskerzen · {{werte}}",
+        "en": "▲ {{coin}}: bullish RSI divergence on daily candles · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit dem Ausgang „bärisch“ meldet dieselbe Chain höhere Hochs bei tieferem RSI.",
+        "en": "With the “bearish” output the same chain reports higher highs with a lower RSI."
+      },
+      {
+        "de": "5 Kerzen davor und danach statt 3 melden 2 Tage später, dafür nur deutlichere Tiefs.",
+        "en": "5 candles before and after instead of 3 report 2 days later, but only clearer lows."
+      }
+    ],
+    "test": {
+      "alerts": 1,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "scanner": {
+    "node": "c1",
+    "pairs": [
+      "BTC/USDT",
+      "ETH/USDT",
+      "SOL/USDT"
+    ]
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1d" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 40 }, "settings": { "length": 14, "oversold": 30, "overbought": 70 } },
+    { "id": "d1", "type": "core.divergence", "position": { "x": 530, "y": 150 }, "settings": { "kind": "regular", "left": 3, "right": 3, "minBars": 3, "maxBars": 60 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 80 }, "settings": { "cooldown": 24, "message": "▲ {{coin}}: bullische RSI-Divergenz auf Tageskerzen · {{werte}}" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 780, "y": 220 }, "settings": { "cooldown": 24, "message": "▲ {{coin}}: bullische RSI-Divergenz auf Tageskerzen · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Fällt der Kurs auf ein tieferes Tief, der RSI aber nicht, verliert der Abverkauf an Schwung. Auf Tageskerzen ist das selten; viele lesen es als Bestätigung zu anderen Signalen, nicht als Signal für sich. Die Divergenz steht fest, wenn das zweite Tief 3 Tage alt ist, und meldet sich dann, nie rückwirkend. Die Kerze läuft als Scanner über BTC, ETH und SOL, jeder Coin meldet sich einzeln. Trag im Webhook-Baustein die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "r1.out", "to": "d1.osc" },
+    { "from": "c1.high", "to": "d1.high" },
+    { "from": "c1.low", "to": "d1.low" },
+    { "from": "d1.bull", "to": "t1.in" },
+    { "from": "d1.bull", "to": "w1.in" }
+  ]
+}

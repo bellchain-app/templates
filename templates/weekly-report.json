@@ -1,0 +1,73 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Wochenbericht am Montag",
+  "version": 1,
+  "description": "Jeden Montag um 8 Uhr Kurs, Veränderung über sieben Tage und RSI per Telegram und E-Mail.",
+  "meta": {
+    "title": {
+      "de": "BTC Wochenbericht am Montag",
+      "en": "BTC Monday Weekly Report"
+    },
+    "description": {
+      "de": "Jeden Montag um 8 Uhr Kurs, Veränderung über sieben Tage und RSI per Telegram und E-Mail.",
+      "en": "Every Monday at 8 AM: price, seven-day change and RSI via Telegram and email."
+    },
+    "tags": [
+      "zeit"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: ein fester Überblick statt Alarme. Der Zeitplan löst jeden Montag um 8 Uhr aus, die Nachrichtenvorlage setzt Kurs, Wochenveränderung und RSI in einen Satz.",
+        "en": "Idea: a fixed overview instead of alerts. The schedule fires every Monday at 8 AM, the message template puts price, weekly change and RSI into one sentence."
+      }
+    },
+    "messages": {
+      "m1": {
+        "de": "{{paar}} am Montag: {{kurs}} · 7 Tage: {{b}} % · RSI 14: {{c}}",
+        "en": "{{pair}} on Monday: {{price}} · 7 days: {{b}}% · RSI 14: {{c}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit „Mo–Fr“ im Zeitplan wird daraus ein Briefing an jedem Werktag.",
+        "en": "With “Mon–Fri” in the schedule it becomes a briefing every workday."
+      },
+      {
+        "de": "Einen weiteren Wert hängst du an Eingang D der Nachrichtenvorlage und schreibst {{d}} in den Text.",
+        "en": "Connect another value to input D of the message template and write {{d}} in the text."
+      }
+    ],
+    "test": {
+      "alerts": 13,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 140 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "z1", "type": "core.schedule", "position": { "x": 280, "y": 40 }, "settings": { "hour": 8, "minute": 0, "days": "mon", "timezone": "Europe/Berlin" } },
+    { "id": "g1", "type": "core.change", "position": { "x": 280, "y": 178 }, "settings": { "length": 168 } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 316 }, "settings": { "length": 14 } },
+    { "id": "m1", "type": "core.message", "position": { "x": 530, "y": 160 }, "settings": { "text": "{{paar}} am Montag: {{kurs}} · 7 Tage: {{b}} % · RSI 14: {{c}}" } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 110 }, "settings": { "cooldown": 1 } },
+    { "id": "e1", "type": "core.email", "position": { "x": 780, "y": 248 }, "settings": { "cooldown": 1 } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 460 },
+      "settings": { "text": "Idee: ein fester Überblick statt Alarme. Der Zeitplan löst jeden Montag um 8 Uhr aus, die Nachrichtenvorlage setzt Kurs, Wochenveränderung und RSI in einen Satz." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "g1.in" },
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "m1.a" },
+    { "from": "g1.out", "to": "m1.b" },
+    { "from": "r1.out", "to": "m1.c" },
+    { "from": "z1.out", "to": "t1.in" },
+    { "from": "m1.out", "to": "t1.message" },
+    { "from": "z1.out", "to": "e1.in" },
+    { "from": "m1.out", "to": "e1.message" }
+  ]
+}

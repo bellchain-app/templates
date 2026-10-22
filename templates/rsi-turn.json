@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "XRP RSI-Wende",
+  "version": 1,
+  "description": "Der RSI verlässt die Extremzonen: ▲ zurück über 25, ▼ zurück unter 75.",
+  "meta": {
+    "title": {
+      "de": "XRP RSI-Wende",
+      "en": "XRP RSI Turn"
+    },
+    "description": {
+      "de": "Der RSI verlässt die Extremzonen: ▲ zurück über 25, ▼ zurück unter 75.",
+      "en": "The RSI leaves its extreme zones: ▲ back above 25, ▼ back below 75."
+    },
+    "tags": [
+      "momentum"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: nicht das Extrem melden, sondern sein Ende. Kreuzt der RSI 25 nach oben, lässt der Verkaufsdruck nach; kreuzt er 75 nach unten, verliert der Anstieg an Schwung.",
+        "en": "Idea: report the end of an extreme, not the extreme itself. When the RSI crosses 25 upwards, selling pressure eases; when it crosses 75 downwards, the rise loses momentum."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: RSI zurück über 25 · {{werte}}",
+        "en": "▲ {{coin}}: RSI back above 25 · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}}: RSI zurück unter 75 · {{werte}}",
+        "en": "▼ {{coin}}: RSI back below 75 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "30 und 70 sind die üblichen Grenzen und bringen mehr Alarme.",
+        "en": "30 and 70 are the usual levels and bring more alerts."
+      },
+      {
+        "de": "Ein RSI 7 reagiert schneller, ein RSI 21 ruhiger.",
+        "en": "An RSI 7 reacts faster, an RSI 21 more calmly."
+      }
+    ],
+    "test": {
+      "alerts": 26,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "XRP/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 110 }, "settings": { "length": 14 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "value": 25 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 178 }, "settings": { "operator": "crossesBelow", "value": 75 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: RSI zurück über 25 · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: RSI zurück unter 75 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: nicht das Extrem melden, sondern sein Ende. Kreuzt der RSI 25 nach oben, lässt der Verkaufsdruck nach; kreuzt er 75 nach unten, verliert der Anstieg an Schwung." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "r1.out", "to": "k2.in" },
+    { "from": "k1.out", "to": "t1.in" },
+    { "from": "k2.out", "to": "t2.in" }
+  ]
+}

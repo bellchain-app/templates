@@ -1,0 +1,75 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Ausbruch aus einer S/R-Zone",
+  "version": 1,
+  "description": "Der Kurs schließt über einer Widerstandszone oder unter einer Unterstützungszone aus drei oder mehr Swings.",
+  "meta": {
+    "title": {
+      "de": "ETH Ausbruch aus einer S/R-Zone",
+      "en": "ETH Breakout from an S/R Zone"
+    },
+    "description": {
+      "de": "Der Kurs schließt über einer Widerstandszone oder unter einer Unterstützungszone aus drei oder mehr Swings.",
+      "en": "The price closes above a resistance zone or below a support zone made of three or more swings."
+    },
+    "tags": [
+      "smartmoney",
+      "ausbruch"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Die S/R-Zonen bündeln Swing-Hochs und -Tiefs der letzten 300 Kerzen (Swings 5 · 5), die höchstens 0,5 % auseinanderliegen; eine Zone zählt ab drei Swings. Schließt eine 4-Stunden-Kerze über einer Widerstandszone, kommt ▲, schließt sie unter einer Unterstützungszone, kommt ▼. Zonen über dem Kurs sind Widerstand, darunter Unterstützung.",
+        "en": "S/R zones group swing highs and lows of the last 300 candles (swings 5 · 5) that are at most 0.5 % apart; a zone counts from three swings. When a 4-hour candle closes above a resistance zone, ▲ comes, when it closes below a support zone, ▼. Zones above the price are resistance, below it support."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}} bricht über eine Widerstandszone · {{werte}}",
+        "en": "▲ {{coin}} breaks above a resistance zone · {{values}}"
+      },
+      "t2": {
+        "de": "▼ {{coin}} bricht unter eine Unterstützungszone · {{werte}}",
+        "en": "▼ {{coin}} breaks below a support zone · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 4 Swings je Zone bleiben nur die deutlichsten Zonen, und es kommen etwa halb so viele Alarme.",
+        "en": "With 4 swings per zone only the clearest zones remain, and about half as many alerts come."
+      },
+      {
+        "de": "Auf 1-Stunden-Kerzen Swings 10 · 10 und 4 Swings je Zone nehmen, sonst meldet die Chain sehr oft.",
+        "en": "On 1-hour candles use swings 10 · 10 and 4 swings per zone, otherwise the chain alerts very often."
+      },
+      {
+        "de": "Nur Ausbrüche nach oben: die Aktion für ▼ löschen.",
+        "en": "Breakouts upward only: delete the ▼ action."
+      }
+    ],
+    "test": {
+      "alerts": 29,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "4h" } },
+    { "id": "z1", "type": "core.sr-zones", "position": { "x": 330, "y": 150 }, "settings": { "width": 0.5, "touches": 3, "lookback": 300, "left": 5, "right": 5 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 660, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{coin}} bricht über eine Widerstandszone · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 660, "y": 260 }, "settings": { "cooldown": 4, "message": "▼ {{coin}} bricht unter eine Unterstützungszone · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 440 },
+      "settings": { "text": "Die S/R-Zonen bündeln Swing-Hochs und -Tiefs der letzten 300 Kerzen (Swings 5 · 5), die höchstens 0,5 % auseinanderliegen; eine Zone zählt ab drei Swings. Schließt eine 4-Stunden-Kerze über einer Widerstandszone, kommt ▲, schließt sie unter einer Unterstützungszone, kommt ▼. Zonen über dem Kurs sind Widerstand, darunter Unterstützung." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "z1.close" },
+    { "from": "c1.high", "to": "z1.high" },
+    { "from": "c1.low", "to": "z1.low" },
+    { "from": "z1.breakUp", "to": "t1.in" },
+    { "from": "z1.breakDown", "to": "t2.in" }
+  ]
+}

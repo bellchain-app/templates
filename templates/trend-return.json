@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ADA zurück über dem EMA 200",
+  "version": 1,
+  "description": "Der Kurs kreuzt den EMA 200 nach oben, und ein RSI über 60 zeigt Schwung dahinter.",
+  "meta": {
+    "title": {
+      "de": "ADA zurück über dem EMA 200",
+      "en": "ADA Back Above the EMA 200"
+    },
+    "description": {
+      "de": "Der Kurs kreuzt den EMA 200 nach oben, und ein RSI über 60 zeigt Schwung dahinter.",
+      "en": "The price crosses above the EMA 200, and an RSI above 60 shows momentum behind it."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Rückkehr in den Aufwärtstrend. Viele Kreuzungen des EMA 200 sind Fehlstarts. Mit RSI über 60 zählen nur die, hinter denen Kaufdruck steht.",
+        "en": "Idea: a return to the uptrend. Many crosses of the EMA 200 are false starts. With RSI above 60 only those with buying pressure behind them count."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "▲ {{coin}} mit Schwung zurück über dem EMA 200 · {{werte}}",
+        "en": "▲ {{coin}} back above the EMA 200 with momentum · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "RSI über 55 lässt mehr Kreuzungen durch.",
+        "en": "RSI above 55 lets more crosses through."
+      },
+      {
+        "de": "EMA 100 statt 200 für einen kürzeren Trend.",
+        "en": "EMA 100 instead of 200 for a shorter trend."
+      }
+    ],
+    "test": {
+      "alerts": 10,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "ADA/USDT", "timeframe": "1h" } },
+    { "id": "e1", "type": "core.ma", "position": { "x": 280, "y": 40 }, "settings": { "kind": "ema", "length": 200 } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 178 }, "settings": { "length": 14 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 178 }, "settings": { "operator": "above", "value": 60 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 100 }, "settings": {} },
+    { "id": "p1", "type": "core.push", "position": { "x": 1030, "y": 110 }, "settings": { "cooldown": 12, "message": "▲ {{coin}} mit Schwung zurück über dem EMA 200 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Rückkehr in den Aufwärtstrend. Viele Kreuzungen des EMA 200 sind Fehlstarts. Mit RSI über 60 zählen nur die, hinter denen Kaufdruck steht." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "e1.in" },
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "e1.out", "to": "k1.b" },
+    { "from": "r1.out", "to": "k2.in" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "p1.in" }
+  ]
+}

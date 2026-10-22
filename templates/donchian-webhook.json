@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Donchian-Ausbruch als Webhook",
+  "version": 1,
+  "description": "Schluss über dem 20er-Hoch oder unter dem 20er-Tief des Donchian-Kanals, als Webhook an dein System.",
+  "meta": {
+    "title": {
+      "de": "BTC Donchian-Ausbruch als Webhook",
+      "en": "BTC Donchian Breakout as a Webhook"
+    },
+    "description": {
+      "de": "Schluss über dem 20er-Hoch oder unter dem 20er-Tief des Donchian-Kanals, als Webhook an dein System.",
+      "en": "A close above the 20-candle high or below the 20-candle low of the Donchian Channel, as a webhook to your system."
+    },
+    "tags": [
+      "ausbruch",
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Der Donchian-Kanal ist die Grundlage vieler Trendfolge-Systeme: Ein Schluss über dem höchsten Hoch der letzten 20 Kerzen gilt als Ausbruch, einer unter dem tiefsten Tief als Bruch nach unten. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren.",
+        "en": "Idea: the Donchian Channel underlies many trend-following systems: a close above the highest high of the last 20 candles counts as a breakout, one below the lowest low as a break down. Enter your system’s https address in both webhook nodes; without it the chain cannot be activated."
+      }
+    },
+    "messages": {
+      "w1": {
+        "de": "▲ {{paar}}: über dem Donchian-Hoch 20 · {{kurs}}",
+        "en": "▲ {{pair}}: above the Donchian high 20 · {{price}}"
+      },
+      "w2": {
+        "de": "▼ {{paar}}: unter dem Donchian-Tief 20 · {{kurs}}",
+        "en": "▼ {{pair}}: below the Donchian low 20 · {{price}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "55 Kerzen melden nur die großen Ausbrüche.",
+        "en": "55 candles report only the big breakouts."
+      },
+      {
+        "de": "Eine Bestätigung über 2 Kerzen filtert Fehlausbrüche.",
+        "en": "A confirmation over 2 candles filters false breakouts."
+      }
+    ],
+    "test": {
+      "alerts": 30,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "4h" } },
+    { "id": "d1", "type": "core.donchian", "position": { "x": 280, "y": 100 }, "settings": { "length": 20, "current": "exclude" } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ {{paar}}: über dem Donchian-Hoch 20 · {{kurs}}" } },
+    { "id": "w2", "type": "core.webhook", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 4, "message": "▼ {{paar}}: unter dem Donchian-Tief 20 · {{kurs}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: Der Donchian-Kanal ist die Grundlage vieler Trendfolge-Systeme: Ein Schluss über dem höchsten Hoch der letzten 20 Kerzen gilt als Ausbruch, einer unter dem tiefsten Tief als Bruch nach unten. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.high", "to": "d1.high" },
+    { "from": "c1.low", "to": "d1.low" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "d1.upper", "to": "k1.b" },
+    { "from": "c1.close", "to": "k2.a" },
+    { "from": "d1.lower", "to": "k2.b" },
+    { "from": "k1.out", "to": "w1.in" },
+    { "from": "k2.out", "to": "w2.in" }
+  ]
+}

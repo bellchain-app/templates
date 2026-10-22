@@ -1,0 +1,83 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Dip-Käufer",
+  "version": 1,
+  "description": "RSI unter 35 auf 4-Stunden-Kerzen, aber nur, solange der Kurs über dem EMA 200 liegt.",
+  "meta": {
+    "title": {
+      "de": "BTC Dip-Käufer",
+      "en": "BTC Dip Buyer"
+    },
+    "description": {
+      "de": "RSI unter 35 auf 4-Stunden-Kerzen, aber nur, solange der Kurs über dem EMA 200 liegt.",
+      "en": "RSI below 35 on 4-hour candles, but only while the price is above the EMA 200."
+    },
+    "tags": [
+      "einsteiger",
+      "dip"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Dips im Aufwärtstrend. Der RSI unter 35 zeigt einen überverkauften Markt, der EMA 200 bestätigt den Trend. Auf 4-Stunden-Kerzen gibt das wenige, aber deutliche Alarme; jede Aktion meldet sich höchstens alle 4 Stunden.",
+        "en": "Idea: dips in an uptrend. The RSI below 35 shows an oversold market, the EMA 200 confirms the trend. On 4-hour candles this gives few but clear alerts; each action alerts at most every 4 hours."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "{{kette}}: RSI unter 35 im Aufwärtstrend · {{werte}}",
+        "en": "{{chain}}: RSI below 35 in an uptrend · {{values}}"
+      },
+      "p1": {
+        "de": "{{kette}}: RSI unter 35 im Aufwärtstrend · {{werte}}",
+        "en": "{{chain}}: RSI below 35 in an uptrend · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 1-Stunden-Kerzen und RSI unter 30 meldet sich die Chain bei kürzeren Rücksetzern.",
+        "en": "With 1-hour candles and RSI below 30 the chain alerts on shorter pullbacks."
+      },
+      {
+        "de": "EMA 100 statt 200 folgt einem kürzeren Trend.",
+        "en": "An EMA 100 instead of 200 follows a shorter trend."
+      },
+      {
+        "de": "Ein anderes Paar trägst du in der Kerze ein, etwa ETH/USDT.",
+        "en": "Enter another pair in the candle, such as ETH/USDT."
+      }
+    ],
+    "test": {
+      "alerts": 5,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "4h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 50 }, "settings": { "length": 14 } },
+    { "id": "e1", "type": "core.ma", "position": { "x": 280, "y": 290 }, "settings": { "kind": "ema", "length": 200 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 50 }, "settings": { "operator": "below", "value": 35 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 290 }, "settings": { "operator": "above", "factor": 1 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 170 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 60 }, "settings": { "cooldown": 4, "message": "{{kette}}: RSI unter 35 im Aufwärtstrend · {{werte}}" } },
+    { "id": "p1", "type": "core.push", "position": { "x": 1030, "y": 280 }, "settings": { "cooldown": 4, "message": "{{kette}}: RSI unter 35 im Aufwärtstrend · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 410 },
+      "settings": { "text": "Idee: Dips im Aufwärtstrend. Der RSI unter 35 zeigt einen überverkauften Markt, der EMA 200 bestätigt den Trend. Auf 4-Stunden-Kerzen gibt das wenige, aber deutliche Alarme; jede Aktion meldet sich höchstens alle 4 Stunden." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "e1.in" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "c1.close", "to": "k2.a" },
+    { "from": "e1.out", "to": "k2.b" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" },
+    { "from": "a1.out", "to": "p1.in" }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Wochenschluss und 50-Wochen-Schnitt",
+  "version": 1,
+  "description": "Meldet, wenn BTC eine Woche unter (▼) oder wieder über (▲) dem 50-Wochen-Schnitt schließt; Schluss ist Sonntag 24:00 UTC.",
+  "meta": {
+    "title": {
+      "de": "BTC Wochenschluss und 50-Wochen-Schnitt",
+      "en": "BTC Weekly Close and the 50-Week Average"
+    },
+    "description": {
+      "de": "Meldet, wenn BTC eine Woche unter (▼) oder wieder über (▲) dem 50-Wochen-Schnitt schließt; Schluss ist Sonntag 24:00 UTC.",
+      "en": "Alerts when BTC closes a week below (▼) or back above (▲) the 50-week average; the week closes Sunday 24:00 UTC."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Der 50-Wochen-Schnitt trennt bei BTC oft Aufwärts- und Abwärtsphasen. Ein Wochenschluss darunter zeigt, dass der lange Trend kippt, einer wieder darüber das Gegenteil. Die Wochenkerze läuft von Montag 00:00 bis Sonntag 24:00 UTC, und gezählt wird nur ihr Schluss: Ein Ausflug unter den Schnitt während der Woche löst nichts aus. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren.",
+        "en": "Idea: the 50-week average often separates up and down phases of BTC. A weekly close below it shows the long-term trend tipping over, one back above it the opposite. The weekly candle runs from Monday 00:00 to Sunday 24:00 UTC, and only its close counts: a dip below the average during the week triggers nothing. Enter your system’s https address in both webhook nodes; without it the chain cannot be activated."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▼ {{coin}}: Wochenschluss unter dem 50-Wochen-Schnitt · {{werte}}",
+        "en": "▼ {{coin}}: weekly close below the 50-week average · {{values}}"
+      },
+      "w1": {
+        "de": "▼ {{coin}}: Wochenschluss unter dem 50-Wochen-Schnitt · {{werte}}",
+        "en": "▼ {{coin}}: weekly close below the 50-week average · {{values}}"
+      },
+      "t2": {
+        "de": "▲ {{coin}}: Wochenschluss wieder über dem 50-Wochen-Schnitt · {{werte}}",
+        "en": "▲ {{coin}}: weekly close back above the 50-week average · {{values}}"
+      },
+      "w2": {
+        "de": "▲ {{coin}}: Wochenschluss wieder über dem 50-Wochen-Schnitt · {{werte}}",
+        "en": "▲ {{coin}}: weekly close back above the 50-week average · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 200 statt 50 Wochen misst die Chain den sehr langen Trend.",
+        "en": "With 200 instead of 50 weeks the chain measures the very long-term trend."
+      },
+      {
+        "de": "Mit Trader prüft das Replay 365 Tage, also 52 Wochenschlüsse.",
+        "en": "With Trader the replay covers 365 days, that is 52 weekly closes."
+      }
+    ],
+    "test": {
+      "alerts": 1,
+      "days": 90,
+      "until": "2026-10-12"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1w" } },
+    { "id": "m1", "type": "core.ma", "position": { "x": 280, "y": 260 }, "settings": { "kind": "sma", "length": 50 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 260 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 0 }, "settings": { "cooldown": 168, "message": "▼ {{coin}}: Wochenschluss unter dem 50-Wochen-Schnitt · {{werte}}" } },
+    { "id": "w1", "type": "core.webhook", "position": { "x": 780, "y": 100 }, "settings": { "cooldown": 168, "message": "▼ {{coin}}: Wochenschluss unter dem 50-Wochen-Schnitt · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 780, "y": 230 }, "settings": { "cooldown": 168, "message": "▲ {{coin}}: Wochenschluss wieder über dem 50-Wochen-Schnitt · {{werte}}" } },
+    { "id": "w2", "type": "core.webhook", "position": { "x": 780, "y": 330 }, "settings": { "cooldown": 168, "message": "▲ {{coin}}: Wochenschluss wieder über dem 50-Wochen-Schnitt · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 470 },
+      "settings": { "text": "Idee: Der 50-Wochen-Schnitt trennt bei BTC oft Aufwärts- und Abwärtsphasen. Ein Wochenschluss darunter zeigt, dass der lange Trend kippt, einer wieder darüber das Gegenteil. Die Wochenkerze läuft von Montag 00:00 bis Sonntag 24:00 UTC, und gezählt wird nur ihr Schluss: Ein Ausflug unter den Schnitt während der Woche löst nichts aus. Trag in beiden Webhook-Bausteinen die https-Adresse deines Systems ein; ohne sie lässt sich die Chain nicht aktivieren." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "m1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "m1.out", "to": "k1.b" },
+    { "from": "c1.close", "to": "k2.a" },
+    { "from": "m1.out", "to": "k2.b" },
+    { "from": "k1.out", "to": "t1.in" },
+    { "from": "k1.out", "to": "w1.in" },
+    { "from": "k2.out", "to": "t2.in" },
+    { "from": "k2.out", "to": "w2.in" }
+  ]
+}

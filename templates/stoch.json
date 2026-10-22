@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "LINK Stochastik dreht unten",
+  "version": 1,
+  "description": "%K kreuzt %D nach oben, während die Stochastik unter 15 liegt.",
+  "meta": {
+    "title": {
+      "de": "LINK Stochastik dreht unten",
+      "en": "LINK Stochastic Turns Low"
+    },
+    "description": {
+      "de": "%K kreuzt %D nach oben, während die Stochastik unter 15 liegt.",
+      "en": "%K crosses above %D while the stochastic is below 15."
+    },
+    "tags": [
+      "momentum"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: die Wende im überverkauften Bereich. Die Stochastik zeigt, wo der Kurs in seiner jüngsten Spanne steht. Kreuzt die schnelle Linie %K die langsame %D tief unten nach oben, dreht der kurze Schwung.",
+        "en": "Idea: the turn in oversold territory. The stochastic shows where the price sits within its recent range. When the fast %K line crosses the slow %D line upwards deep down, the short swing turns."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Stochastik dreht unter 15 nach oben · {{werte}}",
+        "en": "▲ {{coin}}: stochastic turns up below 15 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Grenze 20 statt 15 bringt mehr Alarme.",
+        "en": "A limit of 20 instead of 15 brings more alerts."
+      },
+      {
+        "de": "Spiegelbildlich für oben: %K kreuzt %D nach unten, Stochastik über 85.",
+        "en": "The mirror image for the top: %K crosses below %D, stochastic above 85."
+      }
+    ],
+    "test": {
+      "alerts": 25,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "LINK/USDT", "timeframe": "1h" } },
+    { "id": "s1", "type": "core.stoch", "position": { "x": 280, "y": 100 }, "settings": { "length": 14, "smooth": 3, "signal": 3 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 178 }, "settings": { "operator": "below", "value": 15 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 100 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 110 }, "settings": { "cooldown": 6, "message": "▲ {{coin}}: Stochastik dreht unter 15 nach oben · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: die Wende im überverkauften Bereich. Die Stochastik zeigt, wo der Kurs in seiner jüngsten Spanne steht. Kreuzt die schnelle Linie %K die langsame %D tief unten nach oben, dreht der kurze Schwung." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "s1.k", "to": "k1.a" },
+    { "from": "s1.d", "to": "k1.b" },
+    { "from": "s1.k", "to": "k2.in" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

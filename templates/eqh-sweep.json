@@ -1,0 +1,69 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "XRP Sweep über gleiche Hochs",
+  "version": 1,
+  "description": "Zwei Swing-Hochs liegen fast gleich hoch; der Kurs sticht darüber und schließt gleich wieder darunter.",
+  "meta": {
+    "title": {
+      "de": "XRP Sweep über gleiche Hochs",
+      "en": "XRP Sweep Above Equal Highs"
+    },
+    "description": {
+      "de": "Zwei Swing-Hochs liegen fast gleich hoch; der Kurs sticht darüber und schließt gleich wieder darunter.",
+      "en": "Two swing highs sit at almost the same level; the price spikes above them and closes back below right away."
+    },
+    "tags": [
+      "smartmoney",
+      "levels"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Über gleichen Hochs (EQH) liegen besonders viele Stopps und Kaufaufträge. Der Baustein sucht Swing-Hochs (5 · 5), die höchstens 0,2 % auseinanderliegen, und meldet, wenn eine Kerze über das höhere der beiden sticht und wieder darunter schließt: Die Liquidität ist abgeholt, der Ausbruch hält nicht. Viele Trader lesen das als Warnung vor einer Wende nach unten.",
+        "en": "Above equal highs (EQH) sit especially many stops and buy orders. The node looks for swing highs (5 · 5) at most 0.2 % apart and alerts when a candle spikes above the higher of the two and closes back below: the liquidity is taken, the breakout does not hold. Many traders read this as a warning of a turn down."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▼ {{coin}}: Liquidität über gleichen Hochs geholt, der Ausbruch hält nicht · {{werte}}",
+        "en": "▼ {{coin}}: liquidity above equal highs taken, the breakout does not hold · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Für die Gegenseite: „unter Tiefs“ meldet Sweeps unter gleichen Tiefs (EQL).",
+        "en": "For the other side: “below lows” alerts on sweeps below equal lows (EQL)."
+      },
+      {
+        "de": "Mit „alle Swings“ zählt jedes Swing-Hoch, nicht nur gleiche: deutlich mehr Alarme.",
+        "en": "With “all swings” every swing high counts, not just equal ones: clearly more alerts."
+      },
+      {
+        "de": "Mehr Bestätigung: den Sweep an „Erst A“ von „Danach“ hängen und „CHoCH nach unten“ einer Marktstruktur an „Dann B“.",
+        "en": "More confirmation: connect the sweep to “First A” of “Then” and “CHoCH down” of a market structure to “Then B”."
+      }
+    ],
+    "test": {
+      "alerts": 6,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "XRP/USDT", "timeframe": "1h" } },
+    { "id": "w1", "type": "core.sweeps", "position": { "x": 330, "y": 150 }, "settings": { "side": "highs", "pools": "equal", "tolerance": 0.2, "bars": 1, "left": 5, "right": 5 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 660, "y": 150 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: Liquidität über gleichen Hochs geholt, der Ausbruch hält nicht · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 380 },
+      "settings": { "text": "Über gleichen Hochs (EQH) liegen besonders viele Stopps und Kaufaufträge. Der Baustein sucht Swing-Hochs (5 · 5), die höchstens 0,2 % auseinanderliegen, und meldet, wenn eine Kerze über das höhere der beiden sticht und wieder darunter schließt: Die Liquidität ist abgeholt, der Ausbruch hält nicht. Viele Trader lesen das als Warnung vor einer Wende nach unten." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "w1.close" },
+    { "from": "c1.high", "to": "w1.high" },
+    { "from": "c1.low", "to": "w1.low" },
+    { "from": "w1.sweep", "to": "t1.in" }
+  ]
+}

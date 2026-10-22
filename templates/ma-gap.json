@@ -1,0 +1,65 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BNB weit unter dem Schnitt",
+  "version": 1,
+  "description": "Der Kurs liegt 3 % unter dem EMA 50: ein Push, dann 12 Stunden Cooldown.",
+  "meta": {
+    "title": {
+      "de": "BNB weit unter dem Schnitt",
+      "en": "BNB Far Below Average"
+    },
+    "description": {
+      "de": "Der Kurs liegt 3 % unter dem EMA 50: ein Push, dann 12 Stunden Cooldown.",
+      "en": "The price is 3 % below the EMA 50: one push, then a 12-hour cooldown."
+    },
+    "tags": [
+      "dip"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Gummiband. Entfernt sich der Kurs weit von seinem Durchschnitt, ist die Bewegung oft überdehnt. Der Vergleich A/B prüft mit Faktor 0,97, ob der Kurs unter 97 % des EMA 50 liegt.",
+        "en": "Idea: rubber band. When the price moves far from its average, the move is often overstretched. The A/B compare checks with factor 0.97 whether the price is below 97 % of the EMA 50."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "{{coin}} 3 % unter dem EMA 50 · {{werte}}",
+        "en": "{{coin}} 3 % below the EMA 50 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Faktor 0,95 meldet nur größere Abstände.",
+        "en": "Factor 0.95 reports only larger gaps."
+      },
+      {
+        "de": "Für den Abstand nach oben: Operator „über“ und Faktor 1,03.",
+        "en": "For the gap above: operator “above” and factor 1.03."
+      }
+    ],
+    "test": {
+      "alerts": 3,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 40 }, "settings": { "exchange": "binance", "pair": "BNB/USDT", "timeframe": "1h" } },
+    { "id": "m1", "type": "core.ma", "position": { "x": 280, "y": 80 }, "settings": { "kind": "ema", "length": 50 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 80 }, "settings": { "operator": "below", "factor": 0.97 } },
+    { "id": "p1", "type": "core.push", "position": { "x": 780, "y": 80 }, "settings": { "cooldown": 12, "message": "{{coin}} 3 % unter dem EMA 50 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 280, "y": 260 },
+      "settings": { "text": "Idee: Gummiband. Entfernt sich der Kurs weit von seinem Durchschnitt, ist die Bewegung oft überdehnt. Der Vergleich A/B prüft mit Faktor 0,97, ob der Kurs unter 97 % des EMA 50 liegt." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "m1.in" },
+    { "from": "c1.close", "to": "k1.a" },
+    { "from": "m1.out", "to": "k1.b" },
+    { "from": "k1.out", "to": "p1.in" }
+  ]
+}

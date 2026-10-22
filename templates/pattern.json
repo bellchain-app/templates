@@ -1,0 +1,80 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BNB Hammer oder Engulfing",
+  "version": 1,
+  "description": "Ein Hammer oder ein bullisches Engulfing, während der RSI unter 40 liegt.",
+  "meta": {
+    "title": {
+      "de": "BNB Hammer oder Engulfing",
+      "en": "BNB Hammer or Engulfing"
+    },
+    "description": {
+      "de": "Ein Hammer oder ein bullisches Engulfing, während der RSI unter 40 liegt.",
+      "en": "A hammer or a bullish engulfing while the RSI is below 40."
+    },
+    "tags": [
+      "levels"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Kerzenmuster allein sind schwache Signale. Zusammen mit einem niedrigen RSI zeigen Hammer und bullisches Engulfing eher eine mögliche Wende nach einem Rücksetzer. ODER verbindet die beiden Muster, UND nimmt den RSI dazu.",
+        "en": "Idea: candlestick patterns alone are weak signals. Together with a low RSI, a hammer and a bullish engulfing more likely show a possible turn after a pullback. OR joins the two patterns, AND adds the RSI."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ {{coin}}: Hammer oder Engulfing bei RSI unter 40 · {{werte}}",
+        "en": "▲ {{coin}}: hammer or engulfing with RSI below 40 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Den Morgenstern als drittes Muster an ODER hängen.",
+        "en": "Add the morning star as a third pattern to OR."
+      },
+      {
+        "de": "Mit Trend „nicht beachten“ zählen die Muster auch ohne vorherigen Abwärtstrend.",
+        "en": "With trend “ignore” the patterns count even without a prior downtrend."
+      }
+    ],
+    "test": {
+      "alerts": 10,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 190 }, "settings": { "exchange": "binance", "pair": "BNB/USDT", "timeframe": "1h" } },
+    { "id": "h1", "type": "core.candlepattern", "position": { "x": 280, "y": 40 }, "settings": { "pattern": "hammer", "trend": "sma50" } },
+    { "id": "h2", "type": "core.candlepattern", "position": { "x": 280, "y": 222 }, "settings": { "pattern": "bullEngulfing", "trend": "sma50" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 404 }, "settings": { "length": 14 } },
+    { "id": "o1", "type": "core.or", "position": { "x": 530, "y": 150 }, "settings": {} },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 304 }, "settings": { "operator": "below", "value": 40 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 210 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 220 }, "settings": { "cooldown": 4, "message": "▲ {{coin}}: Hammer oder Engulfing bei RSI unter 40 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 550 },
+      "settings": { "text": "Idee: Kerzenmuster allein sind schwache Signale. Zusammen mit einem niedrigen RSI zeigen Hammer und bullisches Engulfing eher eine mögliche Wende nach einem Rücksetzer. ODER verbindet die beiden Muster, UND nimmt den RSI dazu." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "h1.close" },
+    { "from": "c1.open", "to": "h1.open" },
+    { "from": "c1.high", "to": "h1.high" },
+    { "from": "c1.low", "to": "h1.low" },
+    { "from": "c1.close", "to": "h2.close" },
+    { "from": "c1.open", "to": "h2.open" },
+    { "from": "c1.high", "to": "h2.high" },
+    { "from": "c1.low", "to": "h2.low" },
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "h1.out", "to": "o1.in0" },
+    { "from": "h2.out", "to": "o1.in1" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "o1.out", "to": "a1.in0" },
+    { "from": "k1.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

@@ -1,0 +1,72 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC pendelt um den POC von gestern",
+  "version": 1,
+  "description": "Meldet, wenn der Kurs vier Stunden lang im Band ±0,3 % um den POC von gestern pendelt.",
+  "meta": {
+    "title": {
+      "de": "BTC pendelt um den POC von gestern",
+      "en": "BTC Rotates Around Yesterday’s POC"
+    },
+    "description": {
+      "de": "Meldet, wenn der Kurs vier Stunden lang im Band ±0,3 % um den POC von gestern pendelt.",
+      "en": "Alerts when the price rotates within ±0.3 % around yesterday’s POC for four hours."
+    },
+    "tags": [
+      "levels",
+      "volumen"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Das Volumenprofil sucht in den 15-Minuten-Kerzen von gestern (UTC) den Preis mit dem meisten Volumen, den POC. Das Band meldet sich, wenn der Kurs 16 Kerzen lang, also vier Stunden, innerhalb von ±0,3 % um diesen Preis schließt und ihn dabei mindestens dreimal kreuzt. Viele Trader lesen das als Gleichgewicht, bevor sich der Markt für eine Richtung entscheidet.",
+        "en": "The volume profile finds the price with the most volume in yesterday’s 15-minute candles (UTC), the POC. The band reports when the price closes within ±0.3 % of that price for 16 candles, four hours, and crosses it at least three times. Many traders read this as balance before the market picks a direction."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "{{coin}} pendelt um den POC von gestern · {{werte}}",
+        "en": "{{coin}} is rotating around yesterday’s POC · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit ±0,2 % kommen weniger, dafür engere Phasen; mit ±0,4 % mehr.",
+        "en": "±0.2 % gives fewer but tighter phases; ±0.4 % gives more."
+      },
+      {
+        "de": "Statt des POC gehen auch VAH oder VAL: Verbindung am Volumenprofil umstecken.",
+        "en": "VAH or VAL work instead of the POC: move the connection on the volume profile."
+      },
+      {
+        "de": "Mit der Sitzung „laufende“ pendelt der Kurs um den POC von heute.",
+        "en": "With the session set to “current”, the price rotates around today’s POC."
+      }
+    ],
+    "test": {
+      "alerts": 25,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 170 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "15m" } },
+    { "id": "v1", "type": "core.volume-profile", "position": { "x": 330, "y": 40 }, "settings": { "session": "previous", "period": "day" } },
+    { "id": "b1", "type": "core.band", "position": { "x": 630, "y": 170 }, "settings": { "mode": "oscillates", "width": 0.3, "bars": 16, "crossings": 3 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 930, "y": 170 }, "settings": { "cooldown": 6, "message": "{{coin}} pendelt um den POC von gestern · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 400 },
+      "settings": { "text": "Das Volumenprofil sucht in den 15-Minuten-Kerzen von gestern (UTC) den Preis mit dem meisten Volumen, den POC. Das Band meldet sich, wenn der Kurs 16 Kerzen lang, also vier Stunden, innerhalb von ±0,3 % um diesen Preis schließt und ihn dabei mindestens dreimal kreuzt. Viele Trader lesen das als Gleichgewicht, bevor sich der Markt für eine Richtung entscheidet." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.high", "to": "v1.high" },
+    { "from": "c1.low", "to": "v1.low" },
+    { "from": "c1.volume", "to": "v1.volume" },
+    { "from": "c1.close", "to": "b1.in" },
+    { "from": "v1.poc", "to": "b1.line" },
+    { "from": "b1.out", "to": "t1.in" }
+  ]
+}

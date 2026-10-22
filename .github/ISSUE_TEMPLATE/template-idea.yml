@@ -1,0 +1,22 @@
+name: Idea for a template · Idee für eine Vorlage
+description: Describe an alert you'd like as a template · Beschreib einen Alarm, den du dir als Vorlage wünschst
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: What should alert? · Was soll melden?
+      description: The situation in the market, in your words · Die Lage im Markt, in deinen Worten
+      placeholder: e.g. RSI below 30 on the 4-hour chart, but only above the EMA 200 · etwa RSI unter 30 auf 4 Stunden, aber nur über dem EMA 200
+    validations:
+      required: true
+  - type: input
+    id: market
+    attributes:
+      label: Market and timeframe · Markt und Zeiteinheit
+      placeholder: e.g. ETH/USDT 4h · etwa ETH/USDT 4h
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is it useful? · Wofür ist sie gut?
+      description: Optional, with links to explanations · Optional, mit Links zu Erklärungen

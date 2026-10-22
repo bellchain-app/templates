@@ -1,0 +1,76 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Golden Cross und Death Cross",
+  "version": 1,
+  "description": "Der SMA 50 kreuzt den SMA 200 auf 1-Stunden-Kerzen: ▲ Golden Cross, ▼ Death Cross.",
+  "meta": {
+    "title": {
+      "de": "BTC Golden Cross und Death Cross",
+      "en": "BTC Golden Cross and Death Cross"
+    },
+    "description": {
+      "de": "Der SMA 50 kreuzt den SMA 200 auf 1-Stunden-Kerzen: ▲ Golden Cross, ▼ Death Cross.",
+      "en": "The SMA 50 crosses the SMA 200 on 1-hour candles: ▲ golden cross, ▼ death cross."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: der Klassiker unter den Trendsignalen. Steigt der SMA 50 über den SMA 200, heißt das Golden Cross, fällt er darunter, Death Cross. Auf Tageskerzen kommt das selten vor; 1-Stunden-Kerzen zeigen die Wenden im kürzeren Trend.",
+        "en": "Idea: the classic among trend signals. When the SMA 50 rises above the SMA 200 it is called a golden cross, when it falls below, a death cross. On daily candles this is rare; 1-hour candles show the turns of the shorter trend."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "▲ Golden Cross bei {{coin}}: SMA 50 über SMA 200 · {{werte}}",
+        "en": "▲ Golden cross in {{coin}}: SMA 50 above SMA 200 · {{values}}"
+      },
+      "t2": {
+        "de": "▼ Death Cross bei {{coin}}: SMA 50 unter SMA 200 · {{werte}}",
+        "en": "▼ Death cross in {{coin}}: SMA 50 below SMA 200 · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "4-Stunden-Kerzen zeigen den größeren Trend, mit weniger Alarmen.",
+        "en": "4-hour candles show the bigger trend, with fewer alerts."
+      },
+      {
+        "de": "EMA statt SMA reagiert schneller auf neue Kurse.",
+        "en": "EMA instead of SMA reacts faster to new prices."
+      }
+    ],
+    "test": {
+      "alerts": 12,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 70 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "m1", "type": "core.ma", "position": { "x": 280, "y": 40 }, "settings": { "kind": "sma", "length": 50 } },
+    { "id": "m2", "type": "core.ma", "position": { "x": 280, "y": 178 }, "settings": { "kind": "sma", "length": 200 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare-ab", "position": { "x": 530, "y": 178 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 780, "y": 40 }, "settings": { "cooldown": 4, "message": "▲ Golden Cross bei {{coin}}: SMA 50 über SMA 200 · {{werte}}" } },
+    { "id": "t2", "type": "core.telegram", "position": { "x": 780, "y": 178 }, "settings": { "cooldown": 4, "message": "▼ Death Cross bei {{coin}}: SMA 50 unter SMA 200 · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 330 },
+      "settings": { "text": "Idee: der Klassiker unter den Trendsignalen. Steigt der SMA 50 über den SMA 200, heißt das Golden Cross, fällt er darunter, Death Cross. Auf Tageskerzen kommt das selten vor; 1-Stunden-Kerzen zeigen die Wenden im kürzeren Trend." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "m1.in" },
+    { "from": "c1.close", "to": "m2.in" },
+    { "from": "m1.out", "to": "k1.a" },
+    { "from": "m2.out", "to": "k1.b" },
+    { "from": "m1.out", "to": "k2.a" },
+    { "from": "m2.out", "to": "k2.b" },
+    { "from": "k1.out", "to": "t1.in" },
+    { "from": "k2.out", "to": "t2.in" }
+  ]
+}

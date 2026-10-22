@@ -1,0 +1,65 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Stopp-Wecker mit ATR-Stopp",
+  "version": 1,
+  "description": "Ein nachgezogener Stopp im Abstand von drei ATR: Der Push kommt, wenn der Kurs ihn reißt.",
+  "meta": {
+    "title": {
+      "de": "BTC Stopp-Wecker mit ATR-Stopp",
+      "en": "BTC Stop Alarm with ATR Stop"
+    },
+    "description": {
+      "de": "Ein nachgezogener Stopp im Abstand von drei ATR: Der Push kommt, wenn der Kurs ihn reißt.",
+      "en": "A trailing stop three ATRs away: the push arrives when the price breaks it."
+    },
+    "tags": [
+      "volatilitaet",
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Der Chandelier-Stopp hängt drei ATR unter dem höchsten Hoch der letzten 22 Kerzen und rückt mit dem Kurs nach. Schließt eine Kerze darunter, dreht der Trend, und der Push kommt. Bellchain handelt nicht; der Alarm erinnert dich nur.",
+        "en": "Idea: the chandelier stop hangs three ATRs below the highest high of the last 22 candles and follows the price up. When a candle closes below it, the trend flips and the push arrives. Bellchain does not trade; the alert only reminds you."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "▼ {{coin}}: ATR-Stopp gerissen · {{werte}}",
+        "en": "▼ {{coin}}: ATR stop broken · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Faktor 4 lässt dem Kurs mehr Luft.",
+        "en": "A factor of 4 gives the price more room."
+      },
+      {
+        "de": "Mit Art „vom Kurs“ folgt der Stopp dem Schlusskurs statt dem Hoch.",
+        "en": "With type “from the price” the stop follows the close instead of the high."
+      }
+    ],
+    "test": {
+      "alerts": 18,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 40 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "4h" } },
+    { "id": "s1", "type": "core.atrstop", "position": { "x": 280, "y": 70 }, "settings": { "kind": "chandelier", "length": 22, "factor": 3 } },
+    { "id": "p1", "type": "core.push", "position": { "x": 530, "y": 80 }, "settings": { "cooldown": 4, "message": "▼ {{coin}}: ATR-Stopp gerissen · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 260 },
+      "settings": { "text": "Idee: Der Chandelier-Stopp hängt drei ATR unter dem höchsten Hoch der letzten 22 Kerzen und rückt mit dem Kurs nach. Schließt eine Kerze darunter, dreht der Trend, und der Push kommt. Bellchain handelt nicht; der Alarm erinnert dich nur." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "s1.close" },
+    { "from": "c1.high", "to": "s1.high" },
+    { "from": "c1.low", "to": "s1.low" },
+    { "from": "s1.down", "to": "p1.in" }
+  ]
+}

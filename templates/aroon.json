@@ -1,0 +1,85 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC Aroon-Trendwechsel für Discord",
+  "version": 1,
+  "description": "Aroon Up kreuzt Aroon Down über 70 (▲) oder umgekehrt (▼), als Beitrag in deinem Discord-Kanal.",
+  "meta": {
+    "title": {
+      "de": "BTC Aroon-Trendwechsel für Discord",
+      "en": "BTC Aroon Trend Change for Discord"
+    },
+    "description": {
+      "de": "Aroon Up kreuzt Aroon Down über 70 (▲) oder umgekehrt (▼), als Beitrag in deinem Discord-Kanal.",
+      "en": "Aroon Up crosses Aroon Down above 70 (▲) or the other way round (▼), as a post in your Discord channel."
+    },
+    "tags": [
+      "trend"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Aroon misst, wie frisch das letzte Hoch und das letzte Tief sind. Wird das Hoch frischer als das Tief und liegt Aroon Up über 70, beginnt oft ein Aufwärtstrend; umgekehrt ein Abwärtstrend. Für Discord legst du in den Einstellungen des Kanals unter Integrationen einen Webhook an und kopierst seine Adresse in beide Discord-Bausteine.",
+        "en": "Idea: Aroon measures how recent the last high and the last low are. When the high becomes more recent than the low and Aroon Up is above 70, an uptrend often begins; the other way round, a downtrend. For Discord, create a webhook under Integrations in the channel settings and copy its address into both Discord nodes."
+      }
+    },
+    "messages": {
+      "x1": {
+        "de": "▲ {{paar}}: Aroon dreht nach oben · {{werte}}",
+        "en": "▲ {{pair}}: Aroon turns up · {{values}}"
+      },
+      "x2": {
+        "de": "▼ {{paar}}: Aroon dreht nach unten · {{werte}}",
+        "en": "▼ {{pair}}: Aroon turns down · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 25 statt 14 Kerzen werden die Wechsel seltener.",
+        "en": "With 25 instead of 14 candles the changes become rarer."
+      },
+      {
+        "de": "Für eine Telegram-Gruppe legst du einen Telegram-Baustein mit ihrer Chat-ID dazu.",
+        "en": "For a Telegram group, add a Telegram node with its chat ID."
+      }
+    ],
+    "test": {
+      "alerts": 35,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 210 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "4h" } },
+    { "id": "r1", "type": "core.aroon", "position": { "x": 280, "y": 240 }, "settings": { "length": 14 } },
+    { "id": "k1", "type": "core.compare-ab", "position": { "x": 530, "y": 40 }, "settings": { "operator": "crossesAbove", "factor": 1 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 178 }, "settings": { "operator": "above", "value": 70 } },
+    { "id": "k3", "type": "core.compare-ab", "position": { "x": 530, "y": 316 }, "settings": { "operator": "crossesBelow", "factor": 1 } },
+    { "id": "k4", "type": "core.compare", "position": { "x": 530, "y": 454 }, "settings": { "operator": "above", "value": 70 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 780, "y": 160 }, "settings": {} },
+    { "id": "a2", "type": "core.and", "position": { "x": 780, "y": 314 }, "settings": {} },
+    { "id": "x1", "type": "core.discord", "position": { "x": 1030, "y": 180 }, "settings": { "cooldown": 4, "message": "▲ {{paar}}: Aroon dreht nach oben · {{werte}}" } },
+    { "id": "x2", "type": "core.discord", "position": { "x": 1030, "y": 318 }, "settings": { "cooldown": 4, "message": "▼ {{paar}}: Aroon dreht nach unten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 600 },
+      "settings": { "text": "Idee: Aroon misst, wie frisch das letzte Hoch und das letzte Tief sind. Wird das Hoch frischer als das Tief und liegt Aroon Up über 70, beginnt oft ein Aufwärtstrend; umgekehrt ein Abwärtstrend. Für Discord legst du in den Einstellungen des Kanals unter Integrationen einen Webhook an und kopierst seine Adresse in beide Discord-Bausteine." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.high", "to": "r1.high" },
+    { "from": "c1.low", "to": "r1.low" },
+    { "from": "r1.up", "to": "k1.a" },
+    { "from": "r1.down", "to": "k1.b" },
+    { "from": "r1.up", "to": "k2.in" },
+    { "from": "r1.up", "to": "k3.a" },
+    { "from": "r1.down", "to": "k3.b" },
+    { "from": "r1.down", "to": "k4.in" },
+    { "from": "k1.out", "to": "a1.in0" },
+    { "from": "k2.out", "to": "a1.in1" },
+    { "from": "k3.out", "to": "a2.in0" },
+    { "from": "k4.out", "to": "a2.in1" },
+    { "from": "a1.out", "to": "x1.in" },
+    { "from": "a2.out", "to": "x2.in" }
+  ]
+}

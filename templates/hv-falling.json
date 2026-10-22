@@ -1,0 +1,70 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "BTC hohe Schwankung bei fallendem Kurs",
+  "version": 1,
+  "description": "Die Historische Volatilität steigt über 40 %, während BTC seit 24 Stunden fällt: Der Markt wird unruhig.",
+  "meta": {
+    "title": {
+      "de": "BTC hohe Schwankung bei fallendem Kurs",
+      "en": "BTC High Volatility in a Falling Market"
+    },
+    "description": {
+      "de": "Die Historische Volatilität steigt über 40 %, während BTC seit 24 Stunden fällt: Der Markt wird unruhig.",
+      "en": "Historical volatility rises above 40 % while BTC has been falling for 24 hours: the market is getting restless."
+    },
+    "tags": [
+      "volatilitaet",
+      "crash"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Hohe Schwankung allein ist kein Warnzeichen, in starken Anstiegen schwankt der Kurs auch. Zusammen mit einem Kurs, der seit 24 Stunden fällt, zeigt sie unruhige Phasen nach unten. Die Historische Volatilität rechnet die Schwankung der letzten 20 Stundenkerzen auf ein Jahr hoch; über 40 % gilt BTC dort als unruhig.",
+        "en": "Idea: high volatility alone is no warning sign; the price also swings in strong rallies. Together with a price that has been falling for 24 hours, it shows restless phases to the downside. Historical volatility scales the swings of the last 20 hourly candles to a year; above 40 % BTC counts as volatile there."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "{{coin}}: Schwankung hoch bei fallendem Kurs · {{werte}}",
+        "en": "{{coin}}: high volatility while the price falls · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 50 % statt 40 % meldet die Chain nur die stärksten Phasen.",
+        "en": "With 50 % instead of 40 % the chain only reports the strongest phases."
+      },
+      {
+        "de": "Veränderung über 168 statt 24 Kerzen sucht Phasen, in denen der Kurs seit einer Woche fällt.",
+        "en": "Change over 168 instead of 24 candles looks for phases in which the price has been falling for a week."
+      }
+    ],
+    "test": {
+      "alerts": 16,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "BTC/USDT", "timeframe": "1h" } },
+    { "id": "h1", "type": "core.hv", "position": { "x": 300, "y": 40 }, "settings": { "length": 20, "low": 30, "high": 40 } },
+    { "id": "x1", "type": "core.change", "position": { "x": 300, "y": 250 }, "settings": { "length": 24 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 560, "y": 250 }, "settings": { "operator": "below", "value": 0 } },
+    { "id": "a1", "type": "core.and", "position": { "x": 820, "y": 140 }, "settings": {} },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1080, "y": 140 }, "settings": { "cooldown": 24, "message": "{{coin}}: Schwankung hoch bei fallendem Kurs · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Hohe Schwankung allein ist kein Warnzeichen, in starken Anstiegen schwankt der Kurs auch. Zusammen mit einem Kurs, der seit 24 Stunden fällt, zeigt sie unruhige Phasen nach unten. Die Historische Volatilität rechnet die Schwankung der letzten 20 Stundenkerzen auf ein Jahr hoch; über 40 % gilt BTC dort als unruhig." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "h1.in" },
+    { "from": "c1.close", "to": "x1.in" },
+    { "from": "x1.out", "to": "k1.in" },
+    { "from": "h1.high", "to": "a1.in0" },
+    { "from": "k1.out", "to": "a1.in1" },
+    { "from": "a1.out", "to": "t1.in" }
+  ]
+}

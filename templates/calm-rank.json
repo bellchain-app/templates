@@ -1,0 +1,64 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH so ruhig wie selten",
+  "version": 1,
+  "description": "Die Schwankung von ETH fällt unter den Prozentrang 10: so ruhig wie selten in den letzten 30 Tagen.",
+  "meta": {
+    "title": {
+      "de": "ETH so ruhig wie selten",
+      "en": "ETH Unusually Calm"
+    },
+    "description": {
+      "de": "Die Schwankung von ETH fällt unter den Prozentrang 10: so ruhig wie selten in den letzten 30 Tagen.",
+      "en": "ETH volatility drops below percent rank 10: as calm as rarely in the last 30 days."
+    },
+    "tags": [
+      "volatilitaet"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Lange ruhige Phasen enden oft mit einer größeren Bewegung, in welche Richtung, sagt die Ruhe nicht. Die Historische Volatilität misst die Schwankung, der Prozentrang vergleicht sie mit den letzten 180 Kerzen, auf 4-Stunden-Kerzen also 30 Tagen. Unter 10 ist sie niedriger als an 90 % dieser Kerzen.",
+        "en": "Idea: long calm phases often end with a bigger move; the calm does not tell the direction. Historical volatility measures the swings, the percent rank compares them with the last 180 candles, on 4-hour candles 30 days. Below 10 it is lower than on 90 % of those candles."
+      }
+    },
+    "messages": {
+      "t1": {
+        "de": "{{coin}}: Schwankung so niedrig wie selten · {{werte}}",
+        "en": "{{coin}}: volatility as low as rarely · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Prozentrang 1080 statt 180 vergleicht auf 4-Stunden-Kerzen mit einem halben Jahr.",
+        "en": "Percent rank 1080 instead of 180 compares with half a year on 4-hour candles."
+      },
+      {
+        "de": "Mit dem Ausgang „hoch“ über 90 meldet dieselbe Chain ungewöhnlich unruhige Phasen.",
+        "en": "With the “high” output above 90 the same chain reports unusually restless phases."
+      }
+    ],
+    "test": {
+      "alerts": 6,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 150 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "4h" } },
+    { "id": "h1", "type": "core.hv", "position": { "x": 300, "y": 150 }, "settings": { "length": 20, "low": 30, "high": 80 } },
+    { "id": "p1", "type": "core.percent-rank", "position": { "x": 560, "y": 150 }, "settings": { "length": 180, "low": 10, "high": 90 } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 820, "y": 150 }, "settings": { "cooldown": 24, "message": "{{coin}}: Schwankung so niedrig wie selten · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 420 },
+      "settings": { "text": "Idee: Lange ruhige Phasen enden oft mit einer größeren Bewegung, in welche Richtung, sagt die Ruhe nicht. Die Historische Volatilität misst die Schwankung, der Prozentrang vergleicht sie mit den letzten 180 Kerzen, auf 4-Stunden-Kerzen also 30 Tagen. Unter 10 ist sie niedriger als an 90 % dieser Kerzen." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "h1.in" },
+    { "from": "h1.out", "to": "p1.in" },
+    { "from": "p1.low", "to": "t1.in" }
+  ]
+}

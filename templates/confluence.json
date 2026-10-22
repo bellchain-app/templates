@@ -1,0 +1,92 @@
+{
+  "$schema": "../schema/chain.schema.json",
+  "name": "ETH Konfluenz: 3 von 4",
+  "version": 1,
+  "description": "Mindestens drei von vier Signalen melden „überverkauft“: RSI, Stoch RSI, Bollinger-Band und MFI.",
+  "meta": {
+    "title": {
+      "de": "ETH Konfluenz: 3 von 4",
+      "en": "ETH Confluence: 3 of 4"
+    },
+    "description": {
+      "de": "Mindestens drei von vier Signalen melden „überverkauft“: RSI, Stoch RSI, Bollinger-Band und MFI.",
+      "en": "At least three of four signals report “oversold”: RSI, Stoch RSI, Bollinger Band and MFI."
+    },
+    "tags": [
+      "konfluenz",
+      "dip"
+    ],
+    "author": "Bellchain",
+    "notes": {
+      "n1": {
+        "de": "Idee: Ein Signal allein irrt oft, mehrere zusammen seltener. „Mindestens X von N“ zählt, wie viele Bedingungen gerade zutreffen, und meldet sich ab drei. So muss nicht alles gleichzeitig passen.",
+        "en": "Idea: one signal alone is often wrong, several together less often. “At least X of N” counts how many conditions are true right now and alerts from three. So not everything has to match at once."
+      }
+    },
+    "messages": {
+      "p1": {
+        "de": "{{coin}}: 3 von 4 Signalen überverkauft · {{werte}}",
+        "en": "{{coin}}: 3 of 4 signals oversold · {{values}}"
+      },
+      "t1": {
+        "de": "{{coin}}: 3 von 4 Signalen überverkauft · {{werte}}",
+        "en": "{{coin}}: 3 of 4 signals oversold · {{values}}"
+      }
+    },
+    "tips": [
+      {
+        "de": "Mit 2 statt 3 kommen deutlich mehr Alarme.",
+        "en": "With 2 instead of 3 you get many more alerts."
+      },
+      {
+        "de": "Weitere Bedingungen hängst du an die freien Eingänge, bis zu acht.",
+        "en": "Connect further conditions to the free inputs, up to eight."
+      }
+    ],
+    "test": {
+      "alerts": 18,
+      "days": 90,
+      "until": "2026-10-17"
+    }
+  },
+  "nodes": [
+    { "id": "c1", "type": "core.candle", "position": { "x": 30, "y": 240 }, "settings": { "exchange": "binance", "pair": "ETH/USDT", "timeframe": "1h" } },
+    { "id": "r1", "type": "core.rsi", "position": { "x": 280, "y": 40 }, "settings": { "length": 14 } },
+    { "id": "s1", "type": "core.stochrsi", "position": { "x": 280, "y": 178 }, "settings": { "rsiLength": 14, "length": 14, "smooth": 3, "signal": 3 } },
+    { "id": "b1", "type": "core.bb", "position": { "x": 280, "y": 316 }, "settings": { "length": 20, "mult": 2 } },
+    { "id": "m1", "type": "core.mfi", "position": { "x": 280, "y": 470 }, "settings": { "length": 14 } },
+    { "id": "k1", "type": "core.compare", "position": { "x": 530, "y": 70 }, "settings": { "operator": "below", "value": 30 } },
+    { "id": "k2", "type": "core.compare", "position": { "x": 530, "y": 208 }, "settings": { "operator": "below", "value": 10 } },
+    { "id": "k3", "type": "core.compare-ab", "position": { "x": 530, "y": 346 }, "settings": { "operator": "below", "factor": 1 } },
+    { "id": "k4", "type": "core.compare", "position": { "x": 530, "y": 484 }, "settings": { "operator": "below", "value": 20 } },
+    { "id": "x1", "type": "core.atleast", "position": { "x": 780, "y": 240 }, "settings": { "count": 3 } },
+    { "id": "p1", "type": "core.push", "position": { "x": 1030, "y": 210 }, "settings": { "cooldown": 4, "message": "{{coin}}: 3 von 4 Signalen überverkauft · {{werte}}" } },
+    { "id": "t1", "type": "core.telegram", "position": { "x": 1030, "y": 348 }, "settings": { "cooldown": 4, "message": "{{coin}}: 3 von 4 Signalen überverkauft · {{werte}}" } },
+    {
+      "id": "n1",
+      "type": "core.note",
+      "position": { "x": 30, "y": 660 },
+      "settings": { "text": "Idee: Ein Signal allein irrt oft, mehrere zusammen seltener. „Mindestens X von N“ zählt, wie viele Bedingungen gerade zutreffen, und meldet sich ab drei. So muss nicht alles gleichzeitig passen." }
+    }
+  ],
+  "edges": [
+    { "from": "c1.close", "to": "r1.in" },
+    { "from": "c1.close", "to": "s1.in" },
+    { "from": "c1.close", "to": "b1.in" },
+    { "from": "c1.close", "to": "m1.close" },
+    { "from": "c1.high", "to": "m1.high" },
+    { "from": "c1.low", "to": "m1.low" },
+    { "from": "c1.volume", "to": "m1.volume" },
+    { "from": "r1.out", "to": "k1.in" },
+    { "from": "s1.k", "to": "k2.in" },
+    { "from": "c1.close", "to": "k3.a" },
+    { "from": "b1.lower", "to": "k3.b" },
+    { "from": "m1.out", "to": "k4.in" },
+    { "from": "k1.out", "to": "x1.in0" },
+    { "from": "k2.out", "to": "x1.in1" },
+    { "from": "k3.out", "to": "x1.in2" },
+    { "from": "k4.out", "to": "x1.in3" },
+    { "from": "x1.out", "to": "p1.in" },
+    { "from": "x1.out", "to": "t1.in" }
+  ]
+}
